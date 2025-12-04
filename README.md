@@ -107,26 +107,5 @@ proyecto/
 - Cifrado de datos
 - Protección CSRF
 
-Para uso en producción, implementa estas medidas de seguridad.
 
-## 🤝 Contribuciones
 
-Las contribuciones son bienvenidas. Por favor:
-
-1. Haz fork del proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit tus cambios (`git commit -m 'Agrega nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Abre un Pull Request
-
-## 📄 Licencia
-
-Este proyecto es de código abierto y está disponible bajo la Licencia MIT.
-
-## 👥 Autor
-
-Gcota1694 - [GitHub](https://github.com/Gcota1694)
-
-## 📧 Contacto
-
-Para preguntas o sugerencias, abre un issue en GitHub.
