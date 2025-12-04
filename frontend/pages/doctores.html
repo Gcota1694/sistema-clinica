@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctores - Clínica</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div class="main-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">🏥 Clínica</div>
+      <nav>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="../index.html" class="nav-link">📊 Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a href="pacientes.html" class="nav-link">👥 Pacientes</a>
+          </li>
+          <li class="nav-item">
+            <a href="doctores.html" class="nav-link active">👨‍⚕️ Doctores</a>
+          </li>
+          <li class="nav-item">
+            <a href="citas.html" class="nav-link">📅 Citas</a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- CONTENIDO -->
+    <main class="main-content">
+      <div class="page-header">
+        <h1 class="page-title">Gestión de Doctores</h1>
+        <p class="page-subtitle">Administra el personal médico de la clínica</p>
+      </div>
+
+      <!-- BARRA DE ACCIONES -->
+      <div class="card mb-2">
+        <div class="card-body flex-between">
+          <div class="flex gap-1">
+            <input 
+              type="text" 
+              id="buscar-doctor" 
+              class="form-input" 
+              placeholder="Buscar por nombre..."
+              style="max-width: 250px;"
+            >
+            <select id="filtro-especialidad" class="form-select" style="max-width: 200px;">
+              <option value="">Todas las especialidades</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="mostrarFormularioDoctor()">
+            ➕ Nuevo Doctor
+          </button>
+        </div>
+      </div>
+
+      <!-- LISTA DE DOCTORES -->
+      <div id="lista-doctores"></div>
+
+      <!-- MODAL FORMULARIO -->
+      <div id="modal-doctor" style="display: none;"></div>
+
+      <!-- MODAL AGENDA -->
+      <div id="modal-agenda" style="display: none;"></div>
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/doctores.js"></script>
+</body>
+</html>

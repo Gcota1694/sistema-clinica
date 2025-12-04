@@ -1,0 +1,79 @@
+[
+  {
+    "id": "D001",
+    "nombre": "Dr. Carlos Méndez",
+    "especialidad": "Cardiología",
+    "horarioInicio": "09:00",
+    "horarioFin": "17:00",
+    "diasDisponibles": [
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes"
+    ]
+  },
+  {
+    "id": "D002",
+    "nombre": "Dr. Ernesto Salazar",
+    "especialidad": "Neurología",
+    "horarioInicio": "08:00",
+    "horarioFin": "14:00",
+    "diasDisponibles": [
+      "Lunes",
+      "Martes",
+      "Jueves"
+    ]
+  },
+  {
+    "id": "D003",
+    "nombre": "Dra. Jimena Ortiz",
+    "especialidad": "Pediatría",
+    "horarioInicio": "10:00",
+    "horarioFin": "18:00",
+    "diasDisponibles": [
+      "Martes",
+      "Miércoles",
+      "Viernes"
+    ]
+  },
+  {
+    "id": "D004",
+    "nombre": "Gabriel Alejo",
+    "especialidad": "Cardiología",
+    "horarioInicio": "08:00",
+    "horarioFin": "18:00",
+    "diasDisponibles": [
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Viernes"
+    ]
+  },
+  {
+    "id": "D005",
+    "nombre": "Gabriel Alejo M",
+    "especialidad": "Cardiología",
+    "horarioInicio": "08:00",
+    "horarioFin": "18:00",
+    "diasDisponibles": [
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Viernes"
+    ]
+  },
+  {
+    "id": "D006",
+    "nombre": "xeny",
+    "especialidad": "Gastro",
+    "horarioInicio": "08:00",
+    "horarioFin": "18:00",
+    "diasDisponibles": [
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Viernes"
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Citas - Clínica</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div class="main-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">🏥 Clínica</div>
+      <nav>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="../index.html" class="nav-link">📊 Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a href="pacientes.html" class="nav-link">👥 Pacientes</a>
+          </li>
+          <li class="nav-item">
+            <a href="doctores.html" class="nav-link">👨‍⚕️ Doctores</a>
+          </li>
+          <li class="nav-item">
+            <a href="citas.html" class="nav-link active">📅 Citas</a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- CONTENIDO -->
+    <main class="main-content">
+      <div class="page-header">
+        <h1 class="page-title">Gestión de Citas</h1>
+        <p class="page-subtitle">Administra las citas médicas</p>
+      </div>
+
+      <!-- BARRA DE ACCIONES -->
+      <div class="card mb-2">
+        <div class="card-body">
+          <div class="flex-between" style="flex-wrap: wrap; gap: 1rem;">
+            <div class="flex gap-1" style="flex-wrap: wrap;">
+              <input 
+                type="date" 
+                id="filtro-fecha" 
+                class="form-input" 
+                style="max-width: 200px;"
+              >
+              <select id="filtro-estado" class="form-select" style="max-width: 200px;">
+                <option value="">Todos los estados</option>
+                <option value="programada">Programadas</option>
+                <option value="cancelada">Canceladas</option>
+              </select>
+              <select id="filtro-doctor" class="form-select" style="max-width: 200px;">
+                <option value="">Todos los doctores</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="mostrarFormularioCita()">
+              ➕ Nueva Cita
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LISTA DE CITAS -->
+      <div id="lista-citas"></div>
+
+      <!-- MODAL FORMULARIO -->
+      <div id="modal-cita" style="display: none;"></div>
+
+      <!-- MODAL DETALLE -->
+      <div id="modal-detalle" style="display: none;"></div>
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/citas.js"></script>
+</body>
+</html>

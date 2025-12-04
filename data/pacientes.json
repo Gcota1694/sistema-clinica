@@ -1,0 +1,90 @@
+[
+  {
+    "id": "P001",
+    "nombre": "María González",
+    "edad": 35,
+    "telefono": "555-0101",
+    "email": "maria.g@email.com",
+    "fechaRegistro": "2025-01-15"
+  },
+  {
+    "id": "P002",
+    "nombre": "Juan Pérez García",
+    "edad": 36,
+    "telefono": "6640009999",
+    "email": "juanperez@example.com",
+    "fechaRegistro": "2025-11-11"
+  },
+  {
+    "id": "P003",
+    "nombre": "Gabriel Alejo",
+    "edad": 35,
+    "telefono": "664522551",
+    "email": "gabriel123@example.com",
+    "fechaRegistro": "2025-11-12"
+  },
+  {
+    "id": "P004",
+    "nombre": "Andrés Pacheco",
+    "edad": 38,
+    "telefono": "6623457789",
+    "email": "andres.pacheco@example.com",
+    "fechaRegistro": "2025-11-12"
+  },
+  {
+    "id": "P005",
+    "nombre": "Lucía Ramos",
+    "edad": 29,
+    "telefono": "6698876655",
+    "email": "lucia.ramos@example.com",
+    "fechaRegistro": "2025-11-12"
+  },
+  {
+    "id": "P006",
+    "nombre": "Miguel Castro",
+    "edad": 41,
+    "telefono": "6671223344",
+    "email": "miguel.castro@example.com",
+    "fechaRegistro": "2025-11-12"
+  },
+  {
+    "id": "P007",
+    "nombre": "Luis Mendoza Herrera",
+    "edad": 45,
+    "telefono": "6645558821",
+    "email": "luismh@example.com",
+    "fechaRegistro": "2025-11-15"
+  },
+  {
+    "id": "P008",
+    "nombre": "Alejandra",
+    "edad": 48,
+    "telefono": "6645558821",
+    "email": "alejandra@example.com",
+    "fechaRegistro": "2025-11-15"
+  },
+  {
+    "id": "P009",
+    "nombre": "Xenia",
+    "edad": 48,
+    "telefono": "6645558821",
+    "email": "alejandra1@example.com",
+    "fechaRegistro": "2025-11-15"
+  },
+  {
+    "id": "P010",
+    "nombre": "María González",
+    "edad": 35,
+    "telefono": "555-0101",
+    "email": "maria.ga@email.com",
+    "fechaRegistro": "2025-11-19"
+  },
+  {
+    "id": "P011",
+    "nombre": "Romina",
+    "edad": 33,
+    "telefono": "44413256345",
+    "email": "romina@example.com",
+    "fechaRegistro": "2025-12-02"
+  }
+]
