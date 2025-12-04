@@ -2,70 +2,196 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,GContinuarinitial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pacientes - Clínica</title>
   <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
-  <div class="main-layout">
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="logo">🏥 Clínica</div>
+  <!-- HEADER RESPONSIVO -->
+  <header>
+    <div class="header-content">
+      <a href="../index.html" class="logo">🏥 Sistema Clínica</a>
+      <button class="menu-toggle" aria-label="Toggle menu">☰</button>
       <nav>
-        <ul class="nav-menu">
-          <li class="nav-item">
-            <a href="../index.html" class="nav-link">📊 Dashboard</a>
-          </li>
-          <li class="nav-item">
-            <a href="pacientes.html" class="nav-link active">👥 Pacientes</a>
-          </li>
-          <li class="nav-item">
-            <a href="doctores.html" class="nav-link">👨‍⚕️ Doctores</a>
-          </li>
-          <li class="nav-item">
-            <a href="citas.html" class="nav-link">📅 Citas</a>
-          </li>
+        <ul>
+          <li><a href="../index.html">📊 Dashboard</a></li>
+          <li><a href="pacientes.html" class="active">👥 Pacientes</a></li>
+          <li><a href="doctores.html">👨‍⚕️ Doctores</a></li>
+          <li><a href="citas.html">📅 Citas</a></li>
         </ul>
       </nav>
-    </aside>
-<!-- CONTENIDO -->
-<main class="main-content">
-  <div class="page-header">
-    <h1 class="page-title">Gestión de Pacientes</h1>
-    <p class="page-subtitle">Administra los pacientes de la clínica</p>
-  </div>
+    </div>
+  </header>
 
-  <!-- BARRA DE ACCIONES -->
-  <div class="card mb-2">
-    <div class="card-body flex-between">
-      <input 
-        type="text" 
-        id="buscar-paciente" 
-        class="form-input" 
-        placeholder="Buscar por nombre o ID..."
-        style="max-width: 300px;"
-      >
-      <button class="btn btn-primary" onclick="mostrarFormularioPaciente()">
-        ➕ Nuevo Paciente
-      </button>
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="container">
+    <!-- TÍTULO DE PÁGINA -->
+    <div class="page-header mb-3">
+      <h1 class="page-title">Gestión de Pacientes</h1>
+      <p class="page-subtitle">Administra los pacientes de la clínica</p>
+    </div>
+
+    <!-- BARRA DE ACCIONES -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="flex flex-wrap gap-2 justify-between items-center">
+          <input 
+            type="text" 
+            id="buscar-paciente" 
+            class="form-control" 
+            placeholder="🔍 Buscar por nombre o ID..."
+            style="max-width: 100%; flex: 1; min-width: 200px;"
+          >
+          <button class="btn btn-primary" onclick="mostrarFormularioPaciente()">
+            ➕ Nuevo Paciente
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTA DE PACIENTES -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Lista de Pacientes</h2>
+      </div>
+      <div class="card-body">
+        <div class="table-container">
+          <table id="tabla-pacientes">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Edad</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="lista-pacientes">
+              <!-- Se llenará dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+        <div id="loading-pacientes" class="loading hidden">
+          <div class="spinner"></div>
+        </div>
+        <div id="no-pacientes" class="text-center hidden" style="padding: 2rem;">
+          <p class="text-muted">No hay pacientes registrados</p>
+          <button class="btn btn-primary mt-2" onclick="mostrarFormularioPaciente()">
+            ➕ Agregar primer paciente
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- LISTA DE PACIENTES -->
-  <div id="lista-pacientes"></div>
+  <!-- MODAL FORMULARIO PACIENTE -->
+  <div id="modal-paciente" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-titulo">Nuevo Paciente</h2>
+        <button class="modal-close" onclick="cerrarModalPaciente()">&times;</button>
+      </div>
+      <form id="form-paciente" onsubmit="guardarPaciente(event)">
+        <input type="hidden" id="paciente-id">
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="paciente-nombre">Nombre Completo *</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="paciente-nombre" 
+              required
+              placeholder="Ej: Juan Pérez García"
+            >
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="paciente-edad">Edad *</label>
+            <input 
+              type="number" 
+              class="form-control" 
+              id="paciente-edad" 
+              required
+              min="0"
+              max="150"
+              placeholder="Ej: 35"
+            >
+          </div>
+        </div>
 
-  <!-- MODAL FORMULARIO -->
-  <div id="modal-paciente" style="display: none;">
-    <!-- Se llenará dinámicamente -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="paciente-telefono">Teléfono *</label>
+            <input 
+              type="tel" 
+              class="form-control" 
+              id="paciente-telefono" 
+              required
+              placeholder="Ej: 555-1234"
+            >
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="paciente-email">Email</label>
+            <input 
+              type="email" 
+              class="form-control" 
+              id="paciente-email"
+              placeholder="Ej: juan@email.com"
+            >
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="paciente-direccion">Dirección</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            id="paciente-direccion"
+            placeholder="Ej: Calle Principal #123"
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="paciente-historial">Historial Médico</label>
+          <textarea 
+            class="form-control" 
+            id="paciente-historial" 
+            rows="4"
+            placeholder="Antecedentes médicos, alergias, medicamentos actuales..."
+          ></textarea>
+        </div>
+
+        <div class="flex gap-2 mt-3">
+          <button type="submit" class="btn btn-primary">
+            💾 Guardar
+          </button>
+          <button type="button" class="btn btn-danger" onclick="cerrarModalPaciente()">
+            ❌ Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <!-- MODAL HISTORIAL -->
-  <div id="modal-historial" style="display: none;">
-    <!-- Se llenará dinámicamente -->
+  <!-- MODAL HISTORIAL DE CITAS -->
+  <div id="modal-historial" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Historial de Citas</h2>
+        <button class="modal-close" onclick="cerrarModalHistorial()">&times;</button>
+      </div>
+      <div id="contenido-historial">
+        <!-- Se llenará dinámicamente -->
+      </div>
+    </div>
   </div>
-</main>
-  </div>
+
+  <!-- SCRIPTS -->
   <script src="../js/api.js"></script>
   <script src="../js/pacientes.js"></script>
+  <script src="../js/menu.js"></script>
 </body>
 </html>

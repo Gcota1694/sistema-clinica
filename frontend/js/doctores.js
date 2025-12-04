@@ -3,17 +3,14 @@
 let doctores = [];
 let doctorEditando = null;
 
-const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-
 // ============================================
 // INICIALIZACIÓN
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
   cargarDoctores();
-  cargarFiltroEspecialidades();
   
   // Buscador
-  document.getElementById('buscar-doctor')?.addEventListener('input', (e) => {
+  document.getElementById('buscar-doctor')?.addEventListener('input', () => {
     filtrarDoctores();
   });
   
@@ -39,6 +36,7 @@ async function cargarDoctores() {
   
   doctores = res.data;
   mostrarDoctores(doctores);
+  cargarFiltroEspecialidades();
   ocultarLoading();
 }
 
@@ -49,8 +47,13 @@ function cargarFiltroEspecialidades() {
   const select = document.getElementById('filtro-especialidad');
   if (!select) return;
   
+  // Limpiar opciones existentes excepto la primera
+  while (select.options.length > 1) {
+    select.remove(1);
+  }
+  
   // Obtener especialidades únicas
-  const especialidades = [...new Set(doctores.map(d => d.especialidad))];
+  const especialidades = [...new Set(doctores.map(d => d.especialidad))].sort();
   
   especialidades.forEach(esp => {
     const option = document.createElement('option');
@@ -64,71 +67,72 @@ function cargarFiltroEspecialidades() {
 // MOSTRAR DOCTORES
 // ============================================
 function mostrarDoctores(lista) {
-  const container = document.getElementById('lista-doctores');
+  const tbody = document.getElementById('lista-doctores');
+  const tabla = document.getElementById('tabla-doctores');
+  const noDoctores = document.getElementById('no-doctores');
   
   if (lista.length === 0) {
-    container.innerHTML = `
-      <div class="card">
-        <div class="empty-state">
-          <div class="empty-state-icon">👨‍⚕️</div>
-          <h3 class="empty-state-title">No hay doctores</h3>
-          <p class="empty-state-description">
-            Comienza agregando tu primer doctor
-          </p>
-          <button class="btn btn-primary" onclick="mostrarFormularioDoctor()">
-            ➕ Agregar Doctor
-          </button>
-        </div>
-      </div>
-    `;
+    // Ocultar tabla y mostrar mensaje
+    tabla?.classList.add('hidden');
+    noDoctores?.classList.remove('hidden');
     return;
   }
   
-  // Mostrar en tarjetas (más visual que tabla)
-  let html = '<div class="cards-grid">';
+  // Mostrar tabla y ocultar mensaje
+  tabla?.classList.remove('hidden');
+  noDoctores?.classList.add('hidden');
+  
+  let html = '';
   
   lista.forEach(doctor => {
+    const horario = `${doctor.horarioInicio} - ${doctor.horarioFin}`;
+    const dias = doctor.diasDisponibles ? doctor.diasDisponibles.join(', ') : 'N/A';
+    
     html += `
-      <div class="card">
-        <div class="card-body">
-          <h3 style="margin-bottom: 0.5rem; color: var(--color-primary);">
-            ${doctor.nombre}
-          </h3>
-          <p style="color: var(--color-text-light); margin-bottom: 1rem;">
-            <strong>${doctor.especialidad}</strong>
-          </p>
-          
-          <div style="margin-bottom: 1rem;">
-            <p style="font-size: 0.875rem; margin-bottom: 0.25rem;">
-              🕐 Horario: ${doctor.horarioInicio} - ${doctor.horarioFin}
-            </p>
-            <p style="font-size: 0.875rem; color: var(--color-text-light);">
-              📅 ${doctor.diasDisponibles.join(', ')}
-            </p>
+      <tr>
+        <td data-label="ID"><strong>${doctor.id}</strong></td>
+        <td data-label="Nombre">${doctor.nombre}</td>
+        <td data-label="Especialidad">
+          <span class="badge badge-info">${doctor.especialidad}</span>
+        </td>
+        <td data-label="Teléfono">${doctor.telefono || 'N/A'}</td>
+        <td data-label="Email">${doctor.email || 'N/A'}</td>
+        <td data-label="Horario">
+          <div style="font-size: 0.875rem;">
+            <div>🕐 ${horario}</div>
+            <div style="color: var(--text-light);">📅 ${dias}</div>
           </div>
-          
-          <div class="flex gap-1">
+        </td>
+        <td data-label="Acciones">
+          <div class="table-actions">
             <button 
               class="btn btn-sm btn-primary" 
               onclick="verAgenda('${doctor.id}')"
-              style="flex: 1;"
+              title="Ver agenda del doctor"
             >
               📋 Agenda
             </button>
             <button 
-              class="btn btn-sm btn-secondary" 
+              class="btn btn-sm btn-warning" 
               onclick="editarDoctor('${doctor.id}')"
+              title="Editar doctor"
             >
-              ✏️
+              ✏️ Editar
+            </button>
+            <button 
+              class="btn btn-sm btn-danger" 
+              onclick="confirmarEliminarDoctor('${doctor.id}')"
+              title="Eliminar doctor"
+            >
+              🗑️ Eliminar
             </button>
           </div>
-        </div>
-      </div>
+        </td>
+      </tr>
     `;
   });
   
-  html += '</div>';
-  container.innerHTML = html;
+  tbody.innerHTML = html;
 }
 
 // ============================================
@@ -143,7 +147,9 @@ function filtrarDoctores() {
   if (termino) {
     filtrados = filtrados.filter(d => 
       d.nombre.toLowerCase().includes(termino) ||
-      d.especialidad.toLowerCase().includes(termino)
+      d.especialidad.toLowerCase().includes(termino) ||
+      (d.email && d.email.toLowerCase().includes(termino)) ||
+      (d.telefono && d.telefono.includes(termino))
     );
   }
   
@@ -160,130 +166,36 @@ function filtrarDoctores() {
 function mostrarFormularioDoctor(doctor = null) {
   doctorEditando = doctor;
   const modal = document.getElementById('modal-doctor');
+  const titulo = document.getElementById('modal-titulo-doctor');
   
-  const titulo = doctor ? 'Editar Doctor' : 'Nuevo Doctor';
+  titulo.textContent = doctor ? 'Editar Doctor' : 'Nuevo Doctor';
   
-  // Checkboxes de días
-  let checkboxesDias = '';
-  diasSemana.forEach(dia => {
-    const checked = doctor && doctor.diasDisponibles.includes(dia) ? 'checked' : '';
-    checkboxesDias += `
-      <label class="checkbox-label">
-        <input type="checkbox" name="dias" value="${dia}" ${checked}>
-        ${dia}
-      </label>
-    `;
-  });
+  // Llenar el formulario si es edición
+  if (doctor) {
+    document.getElementById('doctor-id').value = doctor.id;
+    document.getElementById('doctor-nombre').value = doctor.nombre;
+    document.getElementById('doctor-especialidad').value = doctor.especialidad;
+    document.getElementById('doctor-telefono').value = doctor.telefono || '';
+    document.getElementById('doctor-email').value = doctor.email || '';
+    document.getElementById('doctor-horario-inicio').value = doctor.horarioInicio || '08:00';
+    document.getElementById('doctor-horario-fin').value = doctor.horarioFin || '17:00';
+    document.getElementById('doctor-consultorio').value = doctor.consultorio || '';
+  } else {
+    document.getElementById('form-doctor').reset();
+    document.getElementById('doctor-id').value = '';
+  }
   
-  modal.innerHTML = `
-    <div class="loading-overlay" style="background: rgba(0,0,0,0.7);">
-      <div class="card" style="width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
-        <div class="card-header flex-between">
-          <h2 class="card-title">${titulo}</h2>
-          <button class="btn btn-sm btn-secondary" onclick="cerrarModal()">✕</button>
-        </div>
-        
-        <div class="card-body">
-          <form id="form-doctor" onsubmit="guardarDoctor(event)">
-            
-            <div class="form-group">
-              <label class="form-label required">Nombre Completo</label>
-              <input 
-                type="text" 
-                id="nombre" 
-                class="form-input"
-                value="${doctor ? doctor.nombre : ''}"
-                required
-              >
-              <div class="form-error">El nombre es obligatorio</div>
-            </div>
-            
-            <div class="form-group">
-              <label class="form-label required">Especialidad</label>
-              <input 
-                type="text" 
-                id="especialidad" 
-                class="form-input"
-                value="${doctor ? doctor.especialidad : ''}"
-                required
-                list="especialidades-list"
-              >
-              <datalist id="especialidades-list">
-                <option value="Cardiología">
-                <option value="Neurología">
-                <option value="Pediatría">
-                <option value="Dermatología">
-                <option value="Oftalmología">
-                <option value="Traumatología">
-                <option value="Ginecología">
-                <option value="Medicina General">
-              </datalist>
-              <div class="form-error">La especialidad es obligatoria</div>
-            </div>
-            
-            <div class="form-group">
-              <label class="form-label required">Horario de Inicio</label>
-              <input 
-                type="time" 
-                id="horarioInicio" 
-                class="form-input"
-                value="${doctor ? doctor.horarioInicio : '08:00'}"
-                required
-              >
-              <div class="form-error">Selecciona la hora de inicio</div>
-            </div>
-            
-            <div class="form-group">
-              <label class="form-label required">Horario de Fin</label>
-              <input 
-                type="time" 
-                id="horarioFin" 
-                class="form-input"
-                value="${doctor ? doctor.horarioFin : '17:00'}"
-                required
-              >
-              <div class="form-error">Selecciona la hora de fin</div>
-            </div>
-            
-            <div class="form-group">
-              <label class="form-label required">Días Disponibles</label>
-              <div class="checkbox-group" id="dias-disponibles">
-                ${checkboxesDias}
-              </div>
-              <div class="form-error" id="error-dias" style="display: none;">
-                Selecciona al menos un día
-              </div>
-            </div>
-            
-            <div class="flex gap-1 mt-2">
-              <button type="submit" class="btn btn-primary">
-                💾 Guardar
-              </button>
-              <button type="button" class="btn btn-secondary" onclick="cerrarModal()">
-                Cancelar
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  `;
-  
-  modal.style.display = 'block';
-  
-  // Validación de horarios
-  const inicio = document.getElementById('horarioInicio');
-  const fin = document.getElementById('horarioFin');
-  
-  fin.addEventListener('change', () => {
-    if (inicio.value && fin.value && fin.value <= inicio.value) {
-      fin.setCustomValidity('El horario de fin debe ser mayor al de inicio');
-      fin.classList.add('error');
-    } else {
-      fin.setCustomValidity('');
-      fin.classList.remove('error');
-    }
-  });
+  modal.classList.add('active');
+}
+
+// ============================================
+// CERRAR MODAL DOCTOR
+// ============================================
+function cerrarModalDoctor() {
+  const modal = document.getElementById('modal-doctor');
+  modal.classList.remove('active');
+  document.getElementById('form-doctor').reset();
+  doctorEditando = null;
 }
 
 // ============================================
@@ -292,46 +204,29 @@ function mostrarFormularioDoctor(doctor = null) {
 async function guardarDoctor(event) {
   event.preventDefault();
   
-  const form = event.target;
-  
-  // Validar días seleccionados
-  const diasChecked = Array.from(form.querySelectorAll('input[name="dias"]:checked'));
-  const errorDias = document.getElementById('error-dias');
-  
-  if (diasChecked.length === 0) {
-    errorDias.style.display = 'block';
-    return;
-  } else {
-    errorDias.style.display = 'none';
-  }
-  
-  // Validar formulario
-  if (!form.checkValidity()) {
-    form.querySelectorAll('.form-input').forEach(input => {
-      if (!input.checkValidity()) {
-        input.classList.add('error');
-      }
-    });
-    return;
-  }
-  
   const datos = {
-    nombre: document.getElementById('nombre').value.trim(),
-    especialidad: document.getElementById('especialidad').value.trim(),
-    horarioInicio: document.getElementById('horarioInicio').value,
-    horarioFin: document.getElementById('horarioFin').value,
-    diasDisponibles: diasChecked.map(cb => cb.value)
+    nombre: document.getElementById('doctor-nombre').value.trim(),
+    especialidad: document.getElementById('doctor-especialidad').value.trim(),
+    telefono: document.getElementById('doctor-telefono').value.trim() || null,
+    email: document.getElementById('doctor-email').value.trim() || null,
+    horarioInicio: document.getElementById('doctor-horario-inicio').value,
+    horarioFin: document.getElementById('doctor-horario-fin').value,
+    consultorio: document.getElementById('doctor-consultorio').value.trim() || null,
+    diasDisponibles: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'] // Default
   };
+  
+  // Validar horarios
+  if (datos.horarioFin <= datos.horarioInicio) {
+    mostrarError('El horario de fin debe ser mayor al horario de inicio');
+    return;
+  }
   
   mostrarLoading();
   
   let res;
   if (doctorEditando) {
-    // Actualizar (aunque tu API no tiene endpoint PUT para doctores)
-    // Por ahora solo creamos
-    mostrarError('La API no soporta edición de doctores aún');
-    ocultarLoading();
-    return;
+    // Actualizar
+    res = await doctoresAPI.update(doctorEditando.id, datos);
   } else {
     // Crear
     res = await doctoresAPI.create(datos);
@@ -344,8 +239,8 @@ async function guardarDoctor(event) {
     return;
   }
   
-  mostrarExito('Doctor registrado correctamente');
-  cerrarModal();
+  mostrarExito(doctorEditando ? 'Doctor actualizado correctamente' : 'Doctor registrado correctamente');
+  cerrarModalDoctor();
   cargarDoctores();
 }
 
@@ -357,6 +252,37 @@ function editarDoctor(id) {
   if (doctor) {
     mostrarFormularioDoctor(doctor);
   }
+}
+
+// ============================================
+// CONFIRMAR ELIMINAR DOCTOR
+// ============================================
+function confirmarEliminarDoctor(id) {
+  const doctor = doctores.find(d => d.id === id);
+  if (!doctor) return;
+  
+  if (confirm(`¿Estás seguro de eliminar al doctor "${doctor.nombre}"?\n\nEsta acción no se puede deshacer.`)) {
+    eliminarDoctor(id);
+  }
+}
+
+// ============================================
+// ELIMINAR DOCTOR
+// ============================================
+async function eliminarDoctor(id) {
+  mostrarLoading();
+  
+  const res = await doctoresAPI.delete(id);
+  
+  ocultarLoading();
+  
+  if (!res.success) {
+    mostrarError('Error al eliminar doctor: ' + res.error);
+    return;
+  }
+  
+  mostrarExito('Doctor eliminado correctamente');
+  cargarDoctores();
 }
 
 // ============================================
@@ -373,31 +299,27 @@ async function verAgenda(doctorId) {
   ocultarLoading();
   
   const modal = document.getElementById('modal-agenda');
+  const contenido = document.getElementById('contenido-agenda');
   
   let html = `
-    <div class="loading-overlay" style="background: rgba(0,0,0,0.7);">
-      <div class="card" style="width: 90%; max-width: 900px; max-height: 90vh; overflow-y: auto;">
-        <div class="card-header flex-between">
-          <div>
-            <h2 class="card-title">Agenda de ${doctor.nombre}</h2>
-            <p style="color: var(--color-text-light);">${doctor.especialidad}</p>
-          </div>
-          <button class="btn btn-sm btn-secondary" onclick="cerrarModalAgenda()">✕</button>
-        </div>
-        
-        <div class="card-body">
-          <div style="margin-bottom: 1rem; padding: 1rem; background: var(--color-bg); border-radius: var(--radius);">
-            <p><strong>Horario:</strong> ${doctor.horarioInicio} - ${doctor.horarioFin}</p>
-            <p><strong>Días:</strong> ${doctor.diasDisponibles.join(', ')}</p>
-          </div>
+    <div class="mb-3">
+      <h3>${doctor.nombre}</h3>
+      <p class="text-muted">
+        ${doctor.especialidad}
+      </p>
+      <div class="alert alert-info">
+        <strong>🕐 Horario:</strong> ${doctor.horarioInicio} - ${doctor.horarioFin}<br>
+        <strong>📅 Días:</strong> ${doctor.diasDisponibles ? doctor.diasDisponibles.join(', ') : 'N/A'}
+      </div>
+    </div>
   `;
   
   if (!res.success || res.data.length === 0) {
     html += `
-      <div class="empty-state">
-        <div class="empty-state-icon">📅</div>
-        <h3 class="empty-state-title">Sin citas</h3>
-        <p class="empty-state-description">
+      <div class="text-center" style="padding: 2rem;">
+        <div style="font-size: 3rem;">📅</div>
+        <h3>Sin citas programadas</h3>
+        <p class="text-muted">
           Este doctor no tiene citas agendadas
         </p>
       </div>
@@ -407,22 +329,20 @@ async function verAgenda(doctorId) {
     const resPacientes = await pacientesAPI.getAll();
     const pacientes = resPacientes.success ? resPacientes.data : [];
     
-    // Agrupar por estado
-    const programadas = res.data.filter(c => c.estado === 'programada');
-    const canceladas = res.data.filter(c => c.estado === 'cancelada');
+    // Estadísticas
+    const programadas = res.data.filter(c => c.estado === 'programada').length;
+    const completadas = res.data.filter(c => c.estado === 'completada').length;
+    const canceladas = res.data.filter(c => c.estado === 'cancelada').length;
     
     html += `
-      <div style="margin-bottom: 1rem;">
-        <span class="badge badge-success" style="margin-right: 0.5rem;">
-          ${programadas.length} Programadas
-        </span>
-        <span class="badge badge-danger">
-          ${canceladas.length} Canceladas
-        </span>
+      <div class="flex gap-2 mb-3" style="flex-wrap: wrap;">
+        <span class="badge badge-success">${programadas} Programadas</span>
+        <span class="badge badge-info">${completadas} Completadas</span>
+        <span class="badge badge-danger">${canceladas} Canceladas</span>
       </div>
       
       <div class="table-container">
-        <table class="table">
+        <table>
           <thead>
             <tr>
               <th>Fecha</th>
@@ -443,15 +363,17 @@ async function verAgenda(doctorId) {
     
     citasOrdenadas.forEach(cita => {
       const paciente = pacientes.find(p => p.id === cita.pacienteId);
-      const estadoClass = cita.estado === 'programada' ? 'success' : 'danger';
+      const estadoClass = cita.estado === 'programada' ? 'success' : 
+                         cita.estado === 'cancelada' ? 'danger' : 
+                         cita.estado === 'completada' ? 'info' : 'warning';
       
       html += `
         <tr>
-          <td>${formatearFecha(cita.fecha)}</td>
-          <td><strong>${cita.hora}</strong></td>
-          <td>${paciente ? paciente.nombre : 'N/A'}</td>
-          <td>${cita.motivo}</td>
-          <td>
+          <td data-label="Fecha">${formatearFecha(cita.fecha)}</td>
+          <td data-label="Hora"><strong>${cita.hora}</strong></td>
+          <td data-label="Paciente">${paciente ? paciente.nombre : 'N/A'}</td>
+          <td data-label="Motivo">${cita.motivo}</td>
+          <td data-label="Estado">
             <span class="badge badge-${estadoClass}">
               ${cita.estado}
             </span>
@@ -467,24 +389,54 @@ async function verAgenda(doctorId) {
     `;
   }
   
-  html += `
-        </div>
-      </div>
-    </div>
-  `;
-  
-  modal.innerHTML = html;
-  modal.style.display = 'block';
+  contenido.innerHTML = html;
+  modal.classList.add('active');
 }
 
 // ============================================
-// CERRAR MODALES
+// CERRAR MODAL AGENDA
 // ============================================
-function cerrarModal() {
-  document.getElementById('modal-doctor').style.display = 'none';
-  doctorEditando = null;
-}
-
 function cerrarModalAgenda() {
-  document.getElementById('modal-agenda').style.display = 'none';
+  const modal = document.getElementById('modal-agenda');
+  modal.classList.remove('active');
+}
+
+// ============================================
+// FUNCIONES DE UI
+// ============================================
+function mostrarLoading() {
+  const loadingEl = document.getElementById('loading-doctores');
+  if (loadingEl) {
+    loadingEl.classList.remove('hidden');
+  }
+}
+
+function ocultarLoading() {
+  const loadingEl = document.getElementById('loading-doctores');
+  if (loadingEl) {
+    loadingEl.classList.add('hidden');
+  }
+}
+
+function mostrarError(mensaje) {
+  console.error(mensaje);
+  alert('❌ ' + mensaje);
+}
+
+function mostrarExito(mensaje) {
+  console.log(mensaje);
+  alert('✅ ' + mensaje);
+}
+
+// ============================================
+// UTILIDADES
+// ============================================
+function formatearFecha(fecha) {
+  if (!fecha) return 'N/A';
+  const f = new Date(fecha + 'T00:00:00');
+  return f.toLocaleDateString('es-MX', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
 }

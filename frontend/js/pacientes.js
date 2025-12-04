@@ -38,68 +38,53 @@ async function cargarPacientes() {
 // MOSTRAR PACIENTES
 // ============================================
 function mostrarPacientes(lista) {
-  const container = document.getElementById('lista-pacientes');
+  const tbody = document.getElementById('lista-pacientes');
+  const tabla = document.getElementById('tabla-pacientes');
+  const noPacientes = document.getElementById('no-pacientes');
   
   if (lista.length === 0) {
-    container.innerHTML = `
-      <div class="card">
-        <div class="empty-state">
-          <div class="empty-state-icon">👥</div>
-          <h3 class="empty-state-title">No hay pacientes</h3>
-          <p class="empty-state-description">
-            Comienza agregando tu primer paciente
-          </p>
-          <button class="btn btn-primary" onclick="mostrarFormularioPaciente()">
-            ➕ Agregar Paciente
-          </button>
-        </div>
-      </div>
-    `;
+    // Ocultar tabla y mostrar mensaje
+    tabla?.classList.add('hidden');
+    noPacientes?.classList.remove('hidden');
     return;
   }
   
-  let html = `
-    <div class="card">
-      <div class="table-container">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Edad</th>
-              <th>Teléfono</th>
-              <th>Email</th>
-              <th>Registro</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-  `;
+  // Mostrar tabla y ocultar mensaje
+  tabla?.classList.remove('hidden');
+  noPacientes?.classList.add('hidden');
+  
+  let html = '';
   
   lista.forEach(paciente => {
     html += `
       <tr>
-        <td><strong>${paciente.id}</strong></td>
-        <td>${paciente.nombre}</td>
-        <td>${paciente.edad} años</td>
-        <td>${paciente.telefono}</td>
-        <td>${paciente.email}</td>
-        <td>${formatearFecha(paciente.fechaRegistro)}</td>
-        <td>
-          <div class="flex gap-1">
+        <td data-label="ID"><strong>${paciente.id}</strong></td>
+        <td data-label="Nombre">${paciente.nombre}</td>
+        <td data-label="Edad">${paciente.edad} años</td>
+        <td data-label="Teléfono">${paciente.telefono}</td>
+        <td data-label="Email">${paciente.email || 'N/A'}</td>
+        <td data-label="Acciones">
+          <div class="table-actions">
             <button 
               class="btn btn-sm btn-primary" 
               onclick="verHistorial('${paciente.id}')"
-              title="Ver historial"
+              title="Ver historial de citas"
             >
-              📋
+              📋 Historial
             </button>
             <button 
-              class="btn btn-sm btn-secondary" 
+              class="btn btn-sm btn-warning" 
               onclick="editarPaciente('${paciente.id}')"
-              title="Editar"
+              title="Editar paciente"
             >
-              ✏️
+              ✏️ Editar
+            </button>
+            <button 
+              class="btn btn-sm btn-danger" 
+              onclick="confirmarEliminarPaciente('${paciente.id}')"
+              title="Eliminar paciente"
+            >
+              🗑️ Eliminar
             </button>
           </div>
         </td>
@@ -107,14 +92,7 @@ function mostrarPacientes(lista) {
     `;
   });
   
-  html += `
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
-  
-  container.innerHTML = html;
+  tbody.innerHTML = html;
 }
 
 // ============================================
@@ -124,7 +102,8 @@ function filtrarPacientes(termino) {
   const filtrados = pacientes.filter(p => 
     p.nombre.toLowerCase().includes(termino.toLowerCase()) ||
     p.id.toLowerCase().includes(termino.toLowerCase()) ||
-    p.email.toLowerCase().includes(termino.toLowerCase())
+    (p.email && p.email.toLowerCase().includes(termino.toLowerCase())) ||
+    p.telefono.includes(termino)
   );
   
   mostrarPacientes(filtrados);
@@ -136,112 +115,35 @@ function filtrarPacientes(termino) {
 function mostrarFormularioPaciente(paciente = null) {
   pacienteEditando = paciente;
   const modal = document.getElementById('modal-paciente');
+  const titulo = document.getElementById('modal-titulo');
   
-  const titulo = paciente ? 'Editar Paciente' : 'Nuevo Paciente';
+  titulo.textContent = paciente ? 'Editar Paciente' : 'Nuevo Paciente';
   
-  modal.innerHTML = `
-    <div class="loading-overlay" style="background: rgba(0,0,0,0.7);">
-      <div class="card" style="width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
-        <div class="card-header flex-between">
-          <h2 class="card-title">${titulo}</h2>
-          <button class="btn btn-sm btn-secondary" onclick="cerrarModal()">✕</button>
-        </div>
-        
-        <div class="card-body">
-          <form id="form-paciente" onsubmit="guardarPaciente(event)">
-            
-            <div class="form-group">
-              <label class="form-label required">Nombre Completo</label>
-              <input 
-                type="text" 
-                id="nombre" 
-                class="form-input"
-                value="${paciente ? paciente.nombre : ''}"
-                required
-              >
-              <div class="form-error">El nombre es obligatorio</div>
-            </div>
-            
-            <div class="form-group">
-              <label class="form-label required">Edad</label>
-              <input 
-                type="number" 
-                id="edad" 
-                class="form-input"
-                value="${paciente ? paciente.edad : ''}"
-                min="1"
-                max="120"
-                required
-              >
-              <div class="form-error">Ingresa una edad válida (1-120)</div>
-            </div>
-            
-            <div class="form-group">
-              <label class="form-label required">Teléfono</label>
-              <input 
-                type="tel" 
-                id="telefono" 
-                class="form-input"
-                value="${paciente ? paciente.telefono : ''}"
-                pattern="[0-9]{10,15}"
-                required
-              >
-              <div class="form-error">El teléfono debe tener 10-15 dígitos</div>
-            </div>
-            
-            <div class="form-group">
-              <label class="form-label required">Email</label>
-              <input 
-                type="email" 
-                id="email" 
-                class="form-input"
-                value="${paciente ? paciente.email : ''}"
-                required
-              >
-              <div class="form-error">Ingresa un email válido</div>
-            </div>
-            
-            <div class="flex gap-1 mt-2">
-              <button type="submit" class="btn btn-primary">
-                💾 Guardar
-              </button>
-              <button type="button" class="btn btn-secondary" onclick="cerrarModal()">
-                Cancelar
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  `;
+  // Llenar el formulario si es edición
+  if (paciente) {
+    document.getElementById('paciente-id').value = paciente.id;
+    document.getElementById('paciente-nombre').value = paciente.nombre;
+    document.getElementById('paciente-edad').value = paciente.edad;
+    document.getElementById('paciente-telefono').value = paciente.telefono;
+    document.getElementById('paciente-email').value = paciente.email || '';
+    document.getElementById('paciente-direccion').value = paciente.direccion || '';
+    document.getElementById('paciente-historial').value = paciente.historialMedico || '';
+  } else {
+    document.getElementById('form-paciente').reset();
+    document.getElementById('paciente-id').value = '';
+  }
   
-  modal.style.display = 'block';
-  
-  // Validación en tiempo real
-  agregarValidacionTiempoReal();
+  modal.classList.add('active');
 }
 
 // ============================================
-// VALIDACIÓN EN TIEMPO REAL
+// CERRAR MODAL PACIENTE
 // ============================================
-function agregarValidacionTiempoReal() {
-  const inputs = document.querySelectorAll('.form-input');
-  
-  inputs.forEach(input => {
-    input.addEventListener('blur', function() {
-      if (!this.checkValidity()) {
-        this.classList.add('error');
-      } else {
-        this.classList.remove('error');
-      }
-    });
-    
-    input.addEventListener('input', function() {
-      if (this.classList.contains('error') && this.checkValidity()) {
-        this.classList.remove('error');
-      }
-    });
-  });
+function cerrarModalPaciente() {
+  const modal = document.getElementById('modal-paciente');
+  modal.classList.remove('active');
+  document.getElementById('form-paciente').reset();
+  pacienteEditando = null;
 }
 
 // ============================================
@@ -250,24 +152,13 @@ function agregarValidacionTiempoReal() {
 async function guardarPaciente(event) {
   event.preventDefault();
   
-  const form = event.target;
-  
-  // Validar formulario
-  if (!form.checkValidity()) {
-    const inputs = form.querySelectorAll('.form-input');
-    inputs.forEach(input => {
-      if (!input.checkValidity()) {
-        input.classList.add('error');
-      }
-    });
-    return;
-  }
-  
   const datos = {
-    nombre: document.getElementById('nombre').value.trim(),
-    edad: parseInt(document.getElementById('edad').value),
-    telefono: document.getElementById('telefono').value.trim(),
-    email: document.getElementById('email').value.trim().toLowerCase()
+    nombre: document.getElementById('paciente-nombre').value.trim(),
+    edad: parseInt(document.getElementById('paciente-edad').value),
+    telefono: document.getElementById('paciente-telefono').value.trim(),
+    email: document.getElementById('paciente-email').value.trim() || null,
+    direccion: document.getElementById('paciente-direccion').value.trim() || null,
+    historialMedico: document.getElementById('paciente-historial').value.trim() || null
   };
   
   mostrarLoading();
@@ -288,8 +179,8 @@ async function guardarPaciente(event) {
     return;
   }
   
-  mostrarExito(pacienteEditando ? 'Paciente actualizado' : 'Paciente registrado');
-  cerrarModal();
+  mostrarExito(pacienteEditando ? 'Paciente actualizado correctamente' : 'Paciente registrado correctamente');
+  cerrarModalPaciente();
   cargarPacientes();
 }
 
@@ -301,6 +192,37 @@ function editarPaciente(id) {
   if (paciente) {
     mostrarFormularioPaciente(paciente);
   }
+}
+
+// ============================================
+// CONFIRMAR ELIMINAR PACIENTE
+// ============================================
+function confirmarEliminarPaciente(id) {
+  const paciente = pacientes.find(p => p.id === id);
+  if (!paciente) return;
+  
+  if (confirm(`¿Estás seguro de eliminar al paciente "${paciente.nombre}"?\n\nEsta acción no se puede deshacer.`)) {
+    eliminarPaciente(id);
+  }
+}
+
+// ============================================
+// ELIMINAR PACIENTE
+// ============================================
+async function eliminarPaciente(id) {
+  mostrarLoading();
+  
+  const res = await pacientesAPI.delete(id);
+  
+  ocultarLoading();
+  
+  if (!res.success) {
+    mostrarError('Error al eliminar paciente: ' + res.error);
+    return;
+  }
+  
+  mostrarExito('Paciente eliminado correctamente');
+  cargarPacientes();
 }
 
 // ============================================
@@ -317,27 +239,23 @@ async function verHistorial(pacienteId) {
   ocultarLoading();
   
   const modal = document.getElementById('modal-historial');
+  const contenido = document.getElementById('contenido-historial');
   
   let html = `
-    <div class="loading-overlay" style="background: rgba(0,0,0,0.7);">
-      <div class="card" style="width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto;">
-        <div class="card-header flex-between">
-          <div>
-            <h2 class="card-title">Historial de ${paciente.nombre}</h2>
-            <p class="text-muted">${paciente.email}</p>
-          </div>
-          <button class="btn btn-sm btn-secondary" onclick="cerrarModalHistorial()">✕</button>
-        </div>
-        
-        <div class="card-body">
+    <div class="mb-3">
+      <h3>${paciente.nombre}</h3>
+      <p class="text-muted">
+        ${paciente.telefono} | ${paciente.email || 'Sin email'}
+      </p>
+    </div>
   `;
   
   if (!res.success || res.data.length === 0) {
     html += `
-      <div class="empty-state">
-        <div class="empty-state-icon">📋</div>
-        <h3 class="empty-state-title">Sin historial</h3>
-        <p class="empty-state-description">
+      <div class="text-center" style="padding: 2rem;">
+        <div style="font-size: 3rem;">📋</div>
+        <h3>Sin historial de citas</h3>
+        <p class="text-muted">
           Este paciente no tiene citas registradas
         </p>
       </div>
@@ -349,12 +267,13 @@ async function verHistorial(pacienteId) {
     
     html += `
       <div class="table-container">
-        <table class="table">
+        <table>
           <thead>
             <tr>
               <th>Fecha</th>
               <th>Hora</th>
               <th>Doctor</th>
+              <th>Especialidad</th>
               <th>Motivo</th>
               <th>Estado</th>
             </tr>
@@ -365,15 +284,17 @@ async function verHistorial(pacienteId) {
     res.data.forEach(cita => {
       const doctor = doctores.find(d => d.id === cita.doctorId);
       const estadoClass = cita.estado === 'programada' ? 'success' : 
-                         cita.estado === 'cancelada' ? 'danger' : 'info';
+                         cita.estado === 'cancelada' ? 'danger' : 
+                         cita.estado === 'completada' ? 'info' : 'warning';
       
       html += `
         <tr>
-          <td>${formatearFecha(cita.fecha)}</td>
-          <td><strong>${cita.hora}</strong></td>
-          <td>${doctor ? doctor.nombre : 'N/A'}</td>
-          <td>${cita.motivo}</td>
-          <td>
+          <td data-label="Fecha">${formatearFecha(cita.fecha)}</td>
+          <td data-label="Hora"><strong>${cita.hora}</strong></td>
+          <td data-label="Doctor">${doctor ? doctor.nombre : 'N/A'}</td>
+          <td data-label="Especialidad">${doctor ? doctor.especialidad : 'N/A'}</td>
+          <td data-label="Motivo">${cita.motivo}</td>
+          <td data-label="Estado">
             <span class="badge badge-${estadoClass}">
               ${cita.estado}
             </span>
@@ -389,24 +310,54 @@ async function verHistorial(pacienteId) {
     `;
   }
   
-  html += `
-        </div>
-      </div>
-    </div>
-  `;
-  
-  modal.innerHTML = html;
-  modal.style.display = 'block';
+  contenido.innerHTML = html;
+  modal.classList.add('active');
 }
 
 // ============================================
-// CERRAR MODALES
+// CERRAR MODAL HISTORIAL
 // ============================================
-function cerrarModal() {
-  document.getElementById('modal-paciente').style.display = 'none';
-  pacienteEditando = null;
-}
-
 function cerrarModalHistorial() {
-  document.getElementById('modal-historial').style.display = 'none';
+  const modal = document.getElementById('modal-historial');
+  modal.classList.remove('active');
+}
+
+// ============================================
+// FUNCIONES DE UI
+// ============================================
+function mostrarLoading() {
+  const loadingEl = document.getElementById('loading-pacientes');
+  if (loadingEl) {
+    loadingEl.classList.remove('hidden');
+  }
+}
+
+function ocultarLoading() {
+  const loadingEl = document.getElementById('loading-pacientes');
+  if (loadingEl) {
+    loadingEl.classList.add('hidden');
+  }
+}
+
+function mostrarError(mensaje) {
+  console.error(mensaje);
+  alert('❌ ' + mensaje);
+}
+
+function mostrarExito(mensaje) {
+  console.log(mensaje);
+  alert('✅ ' + mensaje);
+}
+
+// ============================================
+// UTILIDADES
+// ============================================
+function formatearFecha(fecha) {
+  if (!fecha) return 'N/A';
+  const f = new Date(fecha + 'T00:00:00');
+  return f.toLocaleDateString('es-MX', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
 }

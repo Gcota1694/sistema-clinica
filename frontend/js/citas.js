@@ -1,3 +1,5 @@
+// frontend/js/citas.js
+
 let citas = [];
 let pacientes = [];
 let doctores = [];
@@ -33,6 +35,8 @@ async function cargarDatos() {
   if (resDoctores.success) doctores = resDoctores.data;
   
   mostrarCitas(citas);
+  cargarSelectPacientes();
+  cargarSelectEspecialidades();
   ocultarLoading();
 }
 
@@ -42,6 +46,11 @@ async function cargarDatos() {
 function cargarFiltroDoctores() {
   const select = document.getElementById('filtro-doctor');
   if (!select) return;
+  
+  // Limpiar opciones existentes excepto la primera
+  while (select.options.length > 1) {
+    select.remove(1);
+  }
   
   doctores.forEach(doctor => {
     const option = document.createElement('option');
@@ -55,25 +64,20 @@ function cargarFiltroDoctores() {
 // MOSTRAR CITAS
 // ============================================
 function mostrarCitas(lista) {
-  const container = document.getElementById('lista-citas');
+  const tbody = document.getElementById('lista-citas');
+  const tabla = document.getElementById('tabla-citas');
+  const noCitas = document.getElementById('no-citas');
   
   if (lista.length === 0) {
-    container.innerHTML = `
-      <div class="card">
-        <div class="empty-state">
-          <div class="empty-state-icon">📅</div>
-          <h3 class="empty-state-title">No hay citas</h3>
-          <p class="empty-state-description">
-            Comienza agendando la primera cita
-          </p>
-          <button class="btn btn-primary" onclick="mostrarFormularioCita()">
-            ➕ Agendar Cita
-          </button>
-        </div>
-      </div>
-    `;
+    // Ocultar tabla y mostrar mensaje
+    tabla?.classList.add('hidden');
+    noCitas?.classList.remove('hidden');
     return;
   }
+  
+  // Mostrar tabla y ocultar mensaje
+  tabla?.classList.remove('hidden');
+  noCitas?.classList.add('hidden');
   
   // Ordenar por fecha y hora (más recientes primero)
   const citasOrdenadas = [...lista].sort((a, b) => {
@@ -81,64 +85,53 @@ function mostrarCitas(lista) {
     return b.hora.localeCompare(a.hora);
   });
   
-  let html = `
-    <div class="card">
-      <div class="table-container">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Fecha</th>
-              <th>Hora</th>
-              <th>Paciente</th>
-              <th>Doctor</th>
-              <th>Especialidad</th>
-              <th>Motivo</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-  `;
+  let html = '';
   
   citasOrdenadas.forEach(cita => {
     const paciente = pacientes.find(p => p.id === cita.pacienteId);
     const doctor = doctores.find(d => d.id === cita.doctorId);
     
-    const estadoClass = cita.estado === 'programada' ? 'success' : 'danger';
+    const estadoClass = cita.estado === 'programada' ? 'success' : 
+                       cita.estado === 'cancelada' ? 'danger' : 
+                       cita.estado === 'completada' ? 'info' : 'warning';
     
     html += `
       <tr>
-        <td><strong>${cita.id}</strong></td>
-        <td>${formatearFecha(cita.fecha)}</td>
-        <td><strong>${cita.hora}</strong></td>
-        <td>${paciente ? paciente.nombre : 'N/A'}</td>
-        <td>${doctor ? doctor.nombre : 'N/A'}</td>
-        <td>${doctor ? doctor.especialidad : 'N/A'}</td>
-        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-          ${cita.motivo}
+        <td data-label="Fecha">${formatearFecha(cita.fecha)}</td>
+        <td data-label="Hora"><strong>${cita.hora}</strong></td>
+        <td data-label="Paciente">${paciente ? paciente.nombre : 'N/A'}</td>
+        <td data-label="Doctor">${doctor ? doctor.nombre : 'N/A'}</td>
+        <td data-label="Especialidad">
+          <span class="badge badge-info">${doctor ? doctor.especialidad : 'N/A'}</span>
         </td>
-        <td>
+        <td data-label="Estado">
           <span class="badge badge-${estadoClass}">
             ${cita.estado}
           </span>
         </td>
-        <td>
-          <div class="flex gap-1">
+        <td data-label="Acciones">
+          <div class="table-actions">
             <button 
               class="btn btn-sm btn-primary" 
               onclick="verDetalleCita('${cita.id}')"
-              title="Ver detalles"
+              title="Ver detalles de la cita"
             >
-              👁️
+              👁️ Ver
             </button>
             ${cita.estado === 'programada' ? `
               <button 
+                class="btn btn-sm btn-success" 
+                onclick="confirmarCompletarCita('${cita.id}')"
+                title="Marcar como completada"
+              >
+                ✅ Completar
+              </button>
+              <button 
                 class="btn btn-sm btn-danger" 
                 onclick="confirmarCancelarCita('${cita.id}')"
-                title="Cancelar"
+                title="Cancelar cita"
               >
-                ❌
+                ❌ Cancelar
               </button>
             ` : ''}
           </div>
@@ -147,14 +140,7 @@ function mostrarCitas(lista) {
     `;
   });
   
-  html += `
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
-  
-  container.innerHTML = html;
+  tbody.innerHTML = html;
 }
 
 // ============================================
@@ -183,124 +169,64 @@ function filtrarCitas() {
 }
 
 // ============================================
-// MOSTRAR FORMULARIO CITA
+// CARGAR SELECT PACIENTES
 // ============================================
-function mostrarFormularioCita() {
-  const modal = document.getElementById('modal-cita');
+function cargarSelectPacientes() {
+  const select = document.getElementById('cita-paciente');
+  if (!select) return;
   
-  // Opciones de pacientes
-  let opcionesPacientes = '<option value="">Selecciona un paciente</option>';
+  // Limpiar opciones existentes excepto la primera
+  while (select.options.length > 1) {
+    select.remove(1);
+  }
+  
   pacientes.forEach(p => {
-    opcionesPacientes += `<option value="${p.id}">${p.nombre}</option>`;
+    const option = document.createElement('option');
+    option.value = p.id;
+    option.textContent = p.nombre;
+    select.appendChild(option);
   });
+}
+
+// ============================================
+// CARGAR SELECT ESPECIALIDADES
+// ============================================
+function cargarSelectEspecialidades() {
+  const select = document.getElementById('cita-especialidad');
+  if (!select) return;
   
-  // Especialidades únicas
-  const especialidades = [...new Set(doctores.map(d => d.especialidad))];
-  let opcionesEspecialidades = '<option value="">Selecciona especialidad</option>';
+  // Limpiar opciones existentes excepto la primera
+  while (select.options.length > 1) {
+    select.remove(1);
+  }
+  
+  // Obtener especialidades únicas
+  const especialidades = [...new Set(doctores.map(d => d.especialidad))].sort();
+  
   especialidades.forEach(esp => {
-    opcionesEspecialidades += `<option value="${esp}">${esp}</option>`;
+    const option = document.createElement('option');
+    option.value = esp;
+    option.textContent = esp;
+    select.appendChild(option);
   });
-  
-  modal.innerHTML = `
-    <div class="loading-overlay" style="background: rgba(0,0,0,0.7);">
-      <div class="card" style="width: 90%; max-width: 700px; max-height: 90vh; overflow-y: auto;">
-        <div class="card-header flex-between">
-          <h2 class="card-title">Agendar Nueva Cita</h2>
-          <button class="btn btn-sm btn-secondary" onclick="cerrarModal()">✕</button>
-        </div>
-        
-        <div class="card-body">
-          <form id="form-cita" onsubmit="guardarCita(event)">
-            
-            <div class="form-group">
-              <label class="form-label required">Paciente</label>
-              <select id="pacienteId" class="form-control" required>
-                ${opcionesPacientes}
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label required">Especialidad</label>
-              <select id="especialidad" class="form-control" required onchange="filtrarDoctoresPorEspecialidad()">
-                ${opcionesEspecialidades}
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label required">Doctor</label>
-              <select id="doctorId" class="form-control" required disabled>
-                <option value="">Primero selecciona especialidad</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label required">Fecha</label>
-              <input 
-                type="date" 
-                id="fecha" 
-                class="form-control" 
-                required
-                min="${new Date().toISOString().split('T')[0]}"
-              >
-            </div>
-
-            <div class="form-group">
-              <label class="form-label required">Hora</label>
-              <input 
-                type="time" 
-                id="hora" 
-                class="form-control" 
-                required
-                min="08:00"
-                max="20:00"
-              >
-              <small class="form-text">Horario de atención: 8:00 AM - 8:00 PM</small>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label required">Motivo de consulta</label>
-              <textarea 
-                id="motivo" 
-                class="form-control" 
-                rows="3" 
-                required
-                placeholder="Describe brevemente el motivo de la consulta"
-              ></textarea>
-            </div>
-
-            <div class="flex gap-2 justify-end">
-              <button type="button" class="btn btn-secondary" onclick="cerrarModal()">
-                Cancelar
-              </button>
-              <button type="submit" class="btn btn-primary">
-                ✅ Agendar Cita
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  `;
-  
-  modal.style.display = 'flex';
 }
 
 // ============================================
 // FILTRAR DOCTORES POR ESPECIALIDAD
 // ============================================
 function filtrarDoctoresPorEspecialidad() {
-  const especialidad = document.getElementById('especialidad').value;
-  const selectDoctor = document.getElementById('doctorId');
+  const especialidad = document.getElementById('cita-especialidad').value;
+  const selectDoctor = document.getElementById('cita-doctor');
   
   if (!especialidad) {
-    selectDoctor.innerHTML = '<option value="">Primero selecciona especialidad</option>';
+    selectDoctor.innerHTML = '<option value="">Seleccione un doctor</option>';
     selectDoctor.disabled = true;
     return;
   }
   
   const doctoresFiltrados = doctores.filter(d => d.especialidad === especialidad);
   
-  let opciones = '<option value="">Selecciona un doctor</option>';
+  let opciones = '<option value="">Seleccione un doctor</option>';
   doctoresFiltrados.forEach(d => {
     opciones += `<option value="${d.id}">${d.nombre}</option>`;
   });
@@ -310,19 +236,62 @@ function filtrarDoctoresPorEspecialidad() {
 }
 
 // ============================================
+// MOSTRAR FORMULARIO CITA
+// ============================================
+function mostrarFormularioCita() {
+  const modal = document.getElementById('modal-cita');
+  const titulo = document.getElementById('modal-titulo-cita');
+  
+  titulo.textContent = 'Nueva Cita';
+  
+  // Resetear formulario
+  document.getElementById('form-cita').reset();
+  document.getElementById('cita-id').value = '';
+  
+  // Establecer fecha mínima (hoy)
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('cita-fecha').setAttribute('min', hoy);
+  
+  // Cargar datos en selects
+  cargarSelectPacientes();
+  cargarSelectEspecialidades();
+  
+  // Deshabilitar select de doctor hasta que se seleccione especialidad
+  document.getElementById('cita-doctor').disabled = true;
+  document.getElementById('cita-doctor').innerHTML = '<option value="">Primero seleccione una especialidad</option>';
+  
+  modal.classList.add('active');
+}
+
+// ============================================
+// CERRAR MODAL CITA
+// ============================================
+function cerrarModalCita() {
+  const modal = document.getElementById('modal-cita');
+  modal.classList.remove('active');
+  document.getElementById('form-cita').reset();
+}
+
+// ============================================
 // GUARDAR CITA
 // ============================================
 async function guardarCita(event) {
   event.preventDefault();
   
   const datos = {
-    pacienteId: document.getElementById('pacienteId').value,
-    doctorId: document.getElementById('doctorId').value,
-    fecha: document.getElementById('fecha').value,
-    hora: document.getElementById('hora').value,
-    motivo: document.getElementById('motivo').value,
-    estado: 'programada'
+    pacienteId: document.getElementById('cita-paciente').value,
+    doctorId: document.getElementById('cita-doctor').value,
+    fecha: document.getElementById('cita-fecha').value,
+    hora: document.getElementById('cita-hora').value,
+    motivo: document.getElementById('cita-motivo').value.trim(),
+    estado: document.getElementById('cita-estado').value || 'programada'
   };
+  
+  // Validar que se haya seleccionado un doctor
+  if (!datos.doctorId) {
+    mostrarError('Debe seleccionar un doctor');
+    return;
+  }
   
   mostrarLoading();
   
@@ -332,7 +301,7 @@ async function guardarCita(event) {
   
   if (resultado.success) {
     mostrarExito('Cita agendada exitosamente');
-    cerrarModal();
+    cerrarModalCita();
     await cargarDatos();
   } else {
     mostrarError(resultado.error || 'Error al agendar cita');
@@ -349,72 +318,112 @@ function verDetalleCita(id) {
   const paciente = pacientes.find(p => p.id === cita.pacienteId);
   const doctor = doctores.find(d => d.id === cita.doctorId);
   
-  const modal = document.getElementById('modal-cita');
+  const modal = document.getElementById('modal-detalle');
+  const contenido = document.getElementById('contenido-detalle');
   
-  modal.innerHTML = `
-    <div class="loading-overlay" style="background: rgba(0,0,0,0.7);">
-      <div class="card" style="width: 90%; max-width: 600px;">
-        <div class="card-header flex-between">
-          <h2 class="card-title">Detalle de Cita #${cita.id}</h2>
-          <button class="btn btn-sm btn-secondary" onclick="cerrarModal()">✕</button>
-        </div>
-        
-        <div class="card-body">
-          <div class="detail-grid">
-            <div class="detail-item">
-              <strong>📅 Fecha:</strong>
-              <span>${formatearFecha(cita.fecha)}</span>
-            </div>
-            
-            <div class="detail-item">
-              <strong>🕐 Hora:</strong>
-              <span>${cita.hora}</span>
-            </div>
-            
-            <div class="detail-item">
-              <strong>👤 Paciente:</strong>
-              <span>${paciente ? paciente.nombre : 'N/A'}</span>
-            </div>
-            
-            <div class="detail-item">
-              <strong>👨‍⚕️ Doctor:</strong>
-              <span>${doctor ? doctor.nombre : 'N/A'}</span>
-            </div>
-            
-            <div class="detail-item">
-              <strong>🏥 Especialidad:</strong>
-              <span>${doctor ? doctor.especialidad : 'N/A'}</span>
-            </div>
-            
-            <div class="detail-item">
-              <strong>📝 Estado:</strong>
-              <span class="badge badge-${cita.estado === 'programada' ? 'success' : 'danger'}">
-                ${cita.estado}
-              </span>
-            </div>
-            
-            <div class="detail-item" style="grid-column: 1 / -1;">
-              <strong>📋 Motivo:</strong>
-              <p style="margin-top: 0.5rem; line-height: 1.6;">${cita.motivo}</p>
-            </div>
-          </div>
-          
-          <div class="flex gap-2 justify-end" style="margin-top: 1.5rem;">
-            ${cita.estado === 'programada' ? `
-              <button class="btn btn-danger" onclick="confirmarCancelarCita('${cita.id}')">
-                ❌ Cancelar Cita
-              </button>
-            ` : ''}
-            <button class="btn btn-secondary" onclick="cerrarModal()">
-              Cerrar
-            </button>
-          </div>
-        </div>
+  const estadoClass = cita.estado === 'programada' ? 'success' : 
+                     cita.estado === 'cancelada' ? 'danger' : 
+                     cita.estado === 'completada' ? 'info' : 'warning';
+  
+  let html = `
+    <div class="alert alert-${estadoClass} mb-3">
+      <h3 style="margin: 0;">Cita #${cita.id}</h3>
+      <p style="margin: 0;">
+        <span class="badge badge-${estadoClass}">${cita.estado.toUpperCase()}</span>
+      </p>
+    </div>
+    
+    <div style="display: grid; gap: 1rem;">
+      <div>
+        <strong>📅 Fecha:</strong>
+        <p style="margin: 0.25rem 0 0 0;">${formatearFecha(cita.fecha)}</p>
       </div>
+      
+      <div>
+        <strong>🕐 Hora:</strong>
+        <p style="margin: 0.25rem 0 0 0;">${cita.hora}</p>
+      </div>
+      
+      <div>
+        <strong>👤 Paciente:</strong>
+        <p style="margin: 0.25rem 0 0 0;">${paciente ? paciente.nombre : 'N/A'}</p>
+        ${paciente && paciente.telefono ? `<p style="color: var(--text-light); font-size: 0.875rem; margin: 0;">📞 ${paciente.telefono}</p>` : ''}
+      </div>
+      
+      <div>
+        <strong>👨‍⚕️ Doctor:</strong>
+        <p style="margin: 0.25rem 0 0 0;">${doctor ? doctor.nombre : 'N/A'}</p>
+        <p style="color: var(--text-light); font-size: 0.875rem; margin: 0;">
+          ${doctor ? doctor.especialidad : 'N/A'}
+        </p>
+      </div>
+      
+      <div>
+        <strong>📋 Motivo de la consulta:</strong>
+        <p style="margin: 0.5rem 0 0 0; line-height: 1.6; padding: 0.75rem; background: var(--bg-light); border-radius: var(--radius);">
+          ${cita.motivo}
+        </p>
+      </div>
+    </div>
+    
+    <div class="flex gap-2 mt-3" style="flex-wrap: wrap;">
+      ${cita.estado === 'programada' ? `
+        <button class="btn btn-success" onclick="confirmarCompletarCita('${cita.id}')">
+          ✅ Marcar Completada
+        </button>
+        <button class="btn btn-danger" onclick="confirmarCancelarCita('${cita.id}')">
+          ❌ Cancelar Cita
+        </button>
+      ` : ''}
+      <button class="btn btn-secondary" onclick="cerrarModalDetalle()">
+        Cerrar
+      </button>
     </div>
   `;
   
-  modal.style.display = 'flex';
+  contenido.innerHTML = html;
+  modal.classList.add('active');
+}
+
+// ============================================
+// CERRAR MODAL DETALLE
+// ============================================
+function cerrarModalDetalle() {
+  const modal = document.getElementById('modal-detalle');
+  modal.classList.remove('active');
+}
+
+// ============================================
+// CONFIRMAR COMPLETAR CITA
+// ============================================
+function confirmarCompletarCita(id) {
+  const cita = citas.find(c => c.id === id);
+  if (!cita) return;
+  
+  const paciente = pacientes.find(p => p.id === cita.pacienteId);
+  
+  if (confirm(`¿Marcar como completada la cita de ${paciente?.nombre} del ${formatearFecha(cita.fecha)} a las ${cita.hora}?`)) {
+    completarCita(id);
+  }
+}
+
+// ============================================
+// COMPLETAR CITA
+// ============================================
+async function completarCita(id) {
+  mostrarLoading();
+  
+  const resultado = await citasAPI.update(id, { estado: 'completada' });
+  
+  ocultarLoading();
+  
+  if (resultado.success) {
+    mostrarExito('Cita marcada como completada');
+    cerrarModalDetalle();
+    await cargarDatos();
+  } else {
+    mostrarError(resultado.error || 'Error al completar cita');
+  }
 }
 
 // ============================================
@@ -426,25 +435,27 @@ function confirmarCancelarCita(id) {
   
   const paciente = pacientes.find(p => p.id === cita.pacienteId);
   
-  if (confirm(`¿Estás seguro de cancelar la cita de ${paciente?.nombre} el ${formatearFecha(cita.fecha)} a las ${cita.hora}?`)) {
+  if (confirm(`¿Estás seguro de cancelar la cita de ${paciente?.nombre} del ${formatearFecha(cita.fecha)} a las ${cita.hora}?\n\nEsta acción no se puede deshacer.`)) {
     cancelarCita(id);
   }
 }
 
 // ============================================
-// CANCELAR CITA - ✅ CORREGIDO
+// CANCELAR CITA
 // ============================================
 async function cancelarCita(id) {
   mostrarLoading();
   
-  // ✅ CORRECCIÓN: Usar citasAPI.cancelar() en lugar de citasAPI.update()
-  const resultado = await citasAPI.cancelar(id);
+  // Usar citasAPI.cancelar() si existe, sino usar update()
+  const resultado = citasAPI.cancelar 
+    ? await citasAPI.cancelar(id)
+    : await citasAPI.update(id, { estado: 'cancelada' });
   
   ocultarLoading();
   
   if (resultado.success) {
     mostrarExito('Cita cancelada exitosamente');
-    cerrarModal();
+    cerrarModalDetalle();
     await cargarDatos();
   } else {
     mostrarError(resultado.error || 'Error al cancelar cita');
@@ -452,18 +463,41 @@ async function cancelarCita(id) {
 }
 
 // ============================================
-// CERRAR MODAL
+// FUNCIONES DE UI
 // ============================================
-function cerrarModal() {
-  const modal = document.getElementById('modal-cita');
-  modal.style.display = 'none';
-  modal.innerHTML = '';
+function mostrarLoading() {
+  const loadingEl = document.getElementById('loading-citas');
+  if (loadingEl) {
+    loadingEl.classList.remove('hidden');
+  }
+}
+
+function ocultarLoading() {
+  const loadingEl = document.getElementById('loading-citas');
+  if (loadingEl) {
+    loadingEl.classList.add('hidden');
+  }
+}
+
+function mostrarError(mensaje) {
+  console.error(mensaje);
+  alert('❌ ' + mensaje);
+}
+
+function mostrarExito(mensaje) {
+  console.log(mensaje);
+  alert('✅ ' + mensaje);
 }
 
 // ============================================
-// FORMATEAR FECHA
+// UTILIDADES
 // ============================================
 function formatearFecha(fecha) {
-  const [year, month, day] = fecha.split('-');
-  return `${day}/${month}/${year}`;
+  if (!fecha) return 'N/A';
+  const f = new Date(fecha + 'T00:00:00');
+  return f.toLocaleDateString('es-MX', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
 }

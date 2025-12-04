@@ -73,12 +73,18 @@ async function cargarCitasHoy() {
   const resCitas = await citasAPI.getAll({ fecha: fechaHoy });
   
   const container = document.getElementById('citas-hoy-container');
+  const loadingEl = document.getElementById('loading-citas');
+  const noCitasEl = document.getElementById('no-citas');
   
   if (!resCitas.success) {
     container.innerHTML = `
-      <div class="empty-state">
-        <p>❌ Error al cargar las citas</p>
-      </div>
+      <tr>
+        <td colspan="5" class="text-center" style="padding: 2rem;">
+          <div class="alert alert-error">
+            ❌ Error al cargar las citas
+          </div>
+        </td>
+      </tr>
     `;
     return;
   }
@@ -86,17 +92,15 @@ async function cargarCitasHoy() {
   const citas = resCitas.data;
   
   if (citas.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">📅</div>
-        <h3 class="empty-state-title">No hay citas para hoy</h3>
-        <p class="empty-state-description">
-          No tienes citas programadas para el día de hoy
-        </p>
-      </div>
-    `;
+    // Ocultar tabla y mostrar mensaje
+    document.getElementById('citas-hoy-table').classList.add('hidden');
+    if (noCitasEl) noCitasEl.classList.remove('hidden');
     return;
   }
+  
+  // Mostrar tabla y ocultar mensaje
+  document.getElementById('citas-hoy-table').classList.remove('hidden');
+  if (noCitasEl) noCitasEl.classList.add('hidden');
   
   // Cargar nombres de pacientes y doctores
   const resPacientes = await pacientesAPI.getAll();
@@ -105,36 +109,24 @@ async function cargarCitasHoy() {
   const pacientes = resPacientes.success ? resPacientes.data : [];
   const doctores = resDoctores.success ? resDoctores.data : [];
   
-  // Crear tabla
-  let html = `
-    <div class="table-container">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Hora</th>
-            <th>Paciente</th>
-            <th>Doctor</th>
-            <th>Motivo</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-        <tbody>
-  `;
+  // Crear filas de la tabla con data-labels para responsive
+  let html = '';
   
   citas.forEach(cita => {
     const paciente = pacientes.find(p => p.id === cita.pacienteId);
     const doctor = doctores.find(d => d.id === cita.doctorId);
     
     const estadoClass = cita.estado === 'programada' ? 'success' : 
-                       cita.estado === 'cancelada' ? 'danger' : 'info';
+                       cita.estado === 'cancelada' ? 'danger' : 
+                       cita.estado === 'completada' ? 'info' : 'warning';
     
     html += `
       <tr>
-        <td><strong>${cita.hora}</strong></td>
-        <td>${paciente ? paciente.nombre : 'N/A'}</td>
-        <td>${doctor ? doctor.nombre : 'N/A'}</td>
-        <td>${cita.motivo}</td>
-        <td>
+        <td data-label="Hora"><strong>${cita.hora}</strong></td>
+        <td data-label="Paciente">${paciente ? paciente.nombre : 'N/A'}</td>
+        <td data-label="Doctor">${doctor ? doctor.nombre : 'N/A'}</td>
+        <td data-label="Especialidad">${doctor ? doctor.especialidad : 'N/A'}</td>
+        <td data-label="Estado">
           <span class="badge badge-${estadoClass}">
             ${cita.estado}
           </span>
@@ -143,11 +135,28 @@ async function cargarCitasHoy() {
     `;
   });
   
-  html += `
-        </tbody>
-      </table>
-    </div>
-  `;
-  
   container.innerHTML = html;
+}
+
+// ============================================
+// FUNCIONES DE UI
+// ============================================
+function mostrarLoading() {
+  const loadingEl = document.getElementById('loading-citas');
+  if (loadingEl) {
+    loadingEl.classList.remove('hidden');
+  }
+}
+
+function ocultarLoading() {
+  const loadingEl = document.getElementById('loading-citas');
+  if (loadingEl) {
+    loadingEl.classList.add('hidden');
+  }
+}
+
+function mostrarError(mensaje) {
+  console.error(mensaje);
+  // Podrías agregar un sistema de notificaciones toast aquí
+  alert(mensaje);
 }

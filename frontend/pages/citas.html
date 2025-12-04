@@ -7,74 +7,213 @@
   <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
-  <div class="main-layout">
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="logo">🏥 Clínica</div>
+  <!-- HEADER RESPONSIVO -->
+  <header>
+    <div class="header-content">
+      <a href="../index.html" class="logo">🏥 Sistema Clínica</a>
+      <button class="menu-toggle" aria-label="Toggle menu">☰</button>
       <nav>
-        <ul class="nav-menu">
-          <li class="nav-item">
-            <a href="../index.html" class="nav-link">📊 Dashboard</a>
-          </li>
-          <li class="nav-item">
-            <a href="pacientes.html" class="nav-link">👥 Pacientes</a>
-          </li>
-          <li class="nav-item">
-            <a href="doctores.html" class="nav-link">👨‍⚕️ Doctores</a>
-          </li>
-          <li class="nav-item">
-            <a href="citas.html" class="nav-link active">📅 Citas</a>
-          </li>
+        <ul>
+          <li><a href="../index.html">📊 Dashboard</a></li>
+          <li><a href="pacientes.html">👥 Pacientes</a></li>
+          <li><a href="doctores.html">👨‍⚕️ Doctores</a></li>
+          <li><a href="citas.html" class="active">📅 Citas</a></li>
         </ul>
       </nav>
-    </aside>
+    </div>
+  </header>
 
-    <!-- CONTENIDO -->
-    <main class="main-content">
-      <div class="page-header">
-        <h1 class="page-title">Gestión de Citas</h1>
-        <p class="page-subtitle">Administra las citas médicas</p>
-      </div>
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="container">
+    <!-- TÍTULO DE PÁGINA -->
+    <div class="page-header mb-3">
+      <h1 class="page-title">Gestión de Citas</h1>
+      <p class="page-subtitle">Administra las citas médicas</p>
+    </div>
 
-      <!-- BARRA DE ACCIONES -->
-      <div class="card mb-2">
-        <div class="card-body">
-          <div class="flex-between" style="flex-wrap: wrap; gap: 1rem;">
-            <div class="flex gap-1" style="flex-wrap: wrap;">
-              <input 
-                type="date" 
-                id="filtro-fecha" 
-                class="form-input" 
-                style="max-width: 200px;"
-              >
-              <select id="filtro-estado" class="form-select" style="max-width: 200px;">
-                <option value="">Todos los estados</option>
-                <option value="programada">Programadas</option>
-                <option value="cancelada">Canceladas</option>
-              </select>
-              <select id="filtro-doctor" class="form-select" style="max-width: 200px;">
-                <option value="">Todos los doctores</option>
-              </select>
-            </div>
-            <button class="btn btn-primary" onclick="mostrarFormularioCita()">
-              ➕ Nueva Cita
-            </button>
+    <!-- BARRA DE FILTROS Y ACCIONES -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="flex flex-wrap gap-2 justify-between items-center">
+          <div class="flex flex-wrap gap-2" style="flex: 1; min-width: 200px;">
+            <input 
+              type="date" 
+              id="filtro-fecha" 
+              class="form-control" 
+              style="min-width: 150px;"
+              title="Filtrar por fecha"
+            >
+            <select id="filtro-estado" class="form-control" style="min-width: 120px;">
+              <option value="">Todos los estados</option>
+              <option value="programada">Programadas</option>
+              <option value="completada">Completadas</option>
+              <option value="cancelada">Canceladas</option>
+            </select>
+            <select id="filtro-doctor" class="form-control" style="min-width: 150px;">
+              <option value="">Todos los doctores</option>
+            </select>
           </div>
+          <button class="btn btn-primary" onclick="mostrarFormularioCita()">
+            ➕ Nueva Cita
+          </button>
         </div>
       </div>
+    </div>
 
-      <!-- LISTA DE CITAS -->
-      <div id="lista-citas"></div>
-
-      <!-- MODAL FORMULARIO -->
-      <div id="modal-cita" style="display: none;"></div>
-
-      <!-- MODAL DETALLE -->
-      <div id="modal-detalle" style="display: none;"></div>
-    </main>
+    <!-- LISTA DE CITAS -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Citas Médicas</h2>
+      </div>
+      <div class="card-body">
+        <div class="table-container">
+          <table id="tabla-citas">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Paciente</th>
+                <th>Doctor</th>
+                <th>Especialidad</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="lista-citas">
+              <!-- Se llenará dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+        <div id="loading-citas" class="loading hidden">
+          <div class="spinner"></div>
+        </div>
+        <div id="no-citas" class="text-center hidden" style="padding: 2rem;">
+          <p class="text-muted">No hay citas registradas</p>
+          <button class="btn btn-primary mt-2" onclick="mostrarFormularioCita()">
+            ➕ Agendar primera cita
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
+  <!-- MODAL FORMULARIO CITA -->
+  <div id="modal-cita" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-titulo-cita">Nueva Cita</h2>
+        <button class="modal-close" onclick="cerrarModalCita()">&times;</button>
+      </div>
+      <form id="form-cita" onsubmit="guardarCita(event)">
+        <input type="hidden" id="cita-id">
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="cita-fecha">Fecha *</label>
+            <input 
+              type="date" 
+              class="form-control" 
+              id="cita-fecha" 
+              required
+            >
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="cita-hora">Hora *</label>
+            <input 
+              type="time" 
+              class="form-control" 
+              id="cita-hora" 
+              required
+            >
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="cita-paciente">Paciente *</label>
+          <select 
+            class="form-control" 
+            id="cita-paciente" 
+            required
+          >
+            <option value="">Seleccione un paciente</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="cita-especialidad">Especialidad *</label>
+          <select 
+            class="form-control" 
+            id="cita-especialidad" 
+            required
+            onchange="filtrarDoctoresPorEspecialidad()"
+          >
+            <option value="">Seleccione una especialidad</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="cita-doctor">Doctor *</label>
+          <select 
+            class="form-control" 
+            id="cita-doctor" 
+            required
+          >
+            <option value="">Seleccione un doctor</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="cita-motivo">Motivo de la Consulta *</label>
+          <textarea 
+            class="form-control" 
+            id="cita-motivo" 
+            rows="3"
+            required
+            placeholder="Describa el motivo de la consulta..."
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="cita-estado">Estado</label>
+          <select 
+            class="form-control" 
+            id="cita-estado"
+          >
+            <option value="programada">Programada</option>
+            <option value="completada">Completada</option>
+            <option value="cancelada">Cancelada</option>
+          </select>
+        </div>
+
+        <div class="flex gap-2 mt-3">
+          <button type="submit" class="btn btn-primary">
+            💾 Guardar Cita
+          </button>
+          <button type="button" class="btn btn-danger" onclick="cerrarModalCita()">
+            ❌ Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL DETALLE DE CITA -->
+  <div id="modal-detalle" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Detalle de la Cita</h2>
+        <button class="modal-close" onclick="cerrarModalDetalle()">&times;</button>
+      </div>
+      <div id="contenido-detalle">
+        <!-- Se llenará dinámicamente -->
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
   <script src="../js/api.js"></script>
   <script src="../js/citas.js"></script>
+  <script src="../js/menu.js"></script>
 </body>
 </html>

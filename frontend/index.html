@@ -7,91 +7,92 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <div class="main-layout">
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="logo">🏥 Clínica</div>
+  <!-- HEADER RESPONSIVO -->
+  <header>
+    <div class="header-content">
+      <a href="index.html" class="logo">🏥 Sistema Clínica</a>
+      <button class="menu-toggle" aria-label="Toggle menu">☰</button>
       <nav>
-        <ul class="nav-menu">
-          <li class="nav-item">
-            <a href="index.html" class="nav-link active">
-              📊 Dashboard
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="pages/pacientes.html" class="nav-link">
-              👥 Pacientes
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="pages/doctores.html" class="nav-link">
-              👨‍⚕️ Doctores
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="pages/citas.html" class="nav-link">
-              📅 Citas
-            </a>
-          </li>
+        <ul>
+          <li><a href="index.html" class="active">📊 Dashboard</a></li>
+          <li><a href="pages/pacientes.html">👥 Pacientes</a></li>
+          <li><a href="pages/doctores.html">👨‍⚕️ Doctores</a></li>
+          <li><a href="pages/citas.html">📅 Citas</a></li>
         </ul>
       </nav>
-    </aside>
+    </div>
+  </header>
 
-    <!-- CONTENIDO PRINCIPAL -->
-    <main class="main-content">
-      <!-- HEADER -->
-      <div class="page-header">
-        <h1 class="page-title">Dashboard</h1>
-        <p class="page-subtitle">Resumen general del sistema</p>
-      </div>
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="container">
+    <!-- TÍTULO DE PÁGINA -->
+    <div class="page-header mb-4">
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">Resumen general del sistema</p>
+    </div>
 
-      <!-- TARJETAS DE ESTADÍSTICAS -->
-      <div class="cards-grid">
-        <div class="card">
-          <div class="card-body">
-            <h3 id="total-pacientes">0</h3>
-            <p class="text-muted">Pacientes Registrados</p>
-          </div>
-        </div>
-        
-        <div class="card">
-          <div class="card-body">
-            <h3 id="total-doctores">0</h3>
-            <p class="text-muted">Doctores Activos</p>
-          </div>
-        </div>
-        
-        <div class="card">
-          <div class="card-body">
-            <h3 id="citas-hoy">0</h3>
-            <p class="text-muted">Citas Hoy</p>
-          </div>
-        </div>
-        
-        <div class="card">
-          <div class="card-body">
-            <h3 id="citas-programadas">0</h3>
-            <p class="text-muted">Citas Programadas</p>
-          </div>
-        </div>
+    <!-- TARJETAS DE ESTADÍSTICAS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Pacientes</h3>
+        <div class="stat-number" id="total-pacientes">0</div>
+        <div class="stat-label">Registrados</div>
       </div>
+      
+      <div class="stat-card">
+        <h3>Doctores</h3>
+        <div class="stat-number" id="total-doctores">0</div>
+        <div class="stat-label">Activos</div>
+      </div>
+      
+      <div class="stat-card">
+        <h3>Citas Hoy</h3>
+        <div class="stat-number" id="citas-hoy">0</div>
+        <div class="stat-label">Programadas</div>
+      </div>
+      
+      <div class="stat-card">
+        <h3>Próximas</h3>
+        <div class="stat-number" id="citas-programadas">0</div>
+        <div class="stat-label">Citas futuras</div>
+      </div>
+    </div>
 
-      <!-- TABLA DE CITAS DE HOY -->
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">Citas de Hoy</h2>
+    <!-- TABLA DE CITAS DE HOY -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Citas de Hoy</h2>
+      </div>
+      <div class="card-body">
+        <div class="table-container">
+          <table id="citas-hoy-table">
+            <thead>
+              <tr>
+                <th>Hora</th>
+                <th>Paciente</th>
+                <th>Doctor</th>
+                <th>Especialidad</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="citas-hoy-container">
+              <!-- Aquí se cargarán las citas -->
+            </tbody>
+          </table>
         </div>
-        <div class="card-body">
-          <div id="citas-hoy-container">
-            <!-- Aquí se cargarán las citas -->
-          </div>
+        <div id="loading-citas" class="loading hidden">
+          <div class="spinner"></div>
+        </div>
+        <div id="no-citas" class="text-center hidden" style="padding: 2rem;">
+          <p class="text-muted">No hay citas programadas para hoy</p>
         </div>
       </div>
-    </main>
+    </div>
   </div>
 
   <!-- SCRIPTS -->
   <script src="js/api.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/menu.js"></script>
 </body>
 </html>
