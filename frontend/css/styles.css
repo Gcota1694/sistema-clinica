@@ -124,10 +124,18 @@ nav a.active {
   padding: var(--spacing-md);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  cursor: pointer;
+  user-select: none;
 }
 
 .stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  background-color: var(--bg-light);
+}
+
+.stat-card:active {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
@@ -476,10 +484,6 @@ tbody tr:hover {
   text-align: right;
 }
 
-.text-muted {
-  color: var(--text-light);
-}
-
 .mt-1 { margin-top: var(--spacing-xs); }
 .mt-2 { margin-top: var(--spacing-sm); }
 .mt-3 { margin-top: var(--spacing-md); }
@@ -512,25 +516,6 @@ tbody tr:hover {
 
 .items-center {
   align-items: center;
-}
-
-/* ============================================
-   PAGE HEADER
-   ============================================ */
-.page-header {
-  margin-bottom: var(--spacing-lg);
-}
-
-.page-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--text-dark);
-  margin-bottom: var(--spacing-xs);
-}
-
-.page-subtitle {
-  color: var(--text-light);
-  font-size: 1rem;
 }
 
 /* ============================================
@@ -578,7 +563,6 @@ tbody tr:hover {
   /* Menú hamburguesa */
   .menu-toggle {
     display: block;
-    z-index: 2001;
   }
   
   nav {
@@ -592,9 +576,7 @@ tbody tr:hover {
     box-shadow: var(--shadow-lg);
     transition: left 0.3s ease;
     padding: var(--spacing-lg);
-    padding-top: 80px;
     z-index: 2000;
-    overflow-y: auto;
   }
   
   nav.active {
@@ -604,7 +586,6 @@ tbody tr:hover {
   nav ul {
     flex-direction: column;
     gap: 0;
-    align-items: stretch;
   }
   
   nav li {
@@ -616,7 +597,6 @@ tbody tr:hover {
     display: block;
     padding: var(--spacing-md);
     width: 100%;
-    text-align: left;
   }
   
   /* Overlay para el menú */
@@ -629,19 +609,10 @@ tbody tr:hover {
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
     z-index: 1999;
-    opacity: 0;
-    transition: opacity 0.3s ease;
   }
   
   .menu-overlay.active {
     display: block;
-    opacity: 1;
-  }
-  
-  /* Asegurar que el header esté por encima */
-  header {
-    z-index: 2001;
-    position: relative;
   }
   
   /* Ajustes de tarjetas */
@@ -731,11 +702,6 @@ tbody tr:hover {
   /* Formularios en móvil */
   .form-row {
     grid-template-columns: 1fr;
-  }
-  
-  /* Page header en móvil */
-  .page-title {
-    font-size: 1.5rem;
   }
 }
 
