@@ -1,104 +1,92 @@
 // frontend/js/menu.js
-// Control del menú móvil responsivo
-
-document.addEventListener('DOMContentLoaded', function() {
-  initMobileMenu();
-});
-
-function initMobileMenu() {
-  const menuToggle = document.querySelector('.menu-toggle');
-  const nav = document.querySelector('nav');
-  const body = document.body;
+(function() {
+  'use strict';
   
-  // Crear overlay si no existe
-  let overlay = document.querySelector('.menu-overlay');
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.className = 'menu-overlay';
-    body.appendChild(overlay);
-  }
-  
-  if (!menuToggle || !nav) {
-    return;
-  }
-  
-  // Toggle menú - usar touchstart para móviles
-  menuToggle.addEventListener('touchstart', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    toggleMenu();
-  });
-  
-  menuToggle.addEventListener('click', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    toggleMenu();
-  });
-  
-  // Cerrar menú al tocar el overlay
-  overlay.addEventListener('touchstart', function(e) {
-    e.preventDefault();
-    closeMenu();
-  });
-  
-  overlay.addEventListener('click', function(e) {
-    e.preventDefault();
-    closeMenu();
-  });
-  
-  // Cerrar menú al tocar un enlace
-  const navLinks = nav.querySelectorAll('a');
-  navLinks.forEach(link => {
-    link.addEventListener('touchstart', function(e) {
-      // No prevenir default para permitir navegación
-      setTimeout(() => {
-        closeMenu();
-      }, 50);
-    });
+  function initMenu() {
+    const menuToggle = document.querySelector('.menu-toggle');
+    const nav = document.querySelector('nav');
+    const body = document.body;
     
-    link.addEventListener('click', function(e) {
-      setTimeout(() => {
-        closeMenu();
-      }, 50);
-    });
-  });
-  
-  // Cerrar menú con la tecla ESC
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && nav.classList.contains('active')) {
-      closeMenu();
+    if (!menuToggle || !nav) {
+      console.error('Menu elements not found');
+      return;
     }
-  });
-  
-  // Función para abrir/cerrar el menú
-  function toggleMenu() {
-    const isActive = nav.classList.toggle('active');
-    overlay.classList.toggle('active');
-    menuToggle.setAttribute('aria-expanded', isActive);
     
-    if (isActive) {
-      body.style.overflow = 'hidden';
-    } else {
+    // Crear overlay
+    let overlay = document.querySelector('.menu-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.className = 'menu-overlay';
+      body.insertBefore(overlay, body.firstChild);
+    }
+    
+    // Función para cerrar menú
+    function closeMenu() {
+      nav.classList.remove('active');
+      overlay.classList.remove('active');
       body.style.overflow = '';
     }
-  }
-  
-  // Función para cerrar el menú
-  function closeMenu() {
-    nav.classList.remove('active');
-    overlay.classList.remove('active');
-    menuToggle.setAttribute('aria-expanded', 'false');
-    body.style.overflow = '';
-  }
-  
-  // Cerrar menú al cambiar de orientación o redimensionar
-  let resizeTimer;
-  window.addEventListener('resize', function() {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function() {
-      if (window.innerWidth >= 768 && nav.classList.contains('active')) {
+    
+    // Función para abrir menú
+    function openMenu() {
+      nav.classList.add('active');
+      overlay.classList.add('active');
+      body.style.overflow = 'hidden';
+    }
+    
+    // Toggle menú
+    function toggleMenu(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if (nav.classList.contains('active')) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    }
+    
+    // Eventos del botón hamburguesa
+    menuToggle.addEventListener('click', toggleMenu, false);
+    menuToggle.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      toggleMenu(e);
+    }, false);
+    
+    // Cerrar al hacer clic en overlay
+    overlay.addEventListener('click', closeMenu, false);
+    overlay.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      closeMenu();
+    }, false);
+    
+    // Cerrar al hacer clic en enlaces
+    const links = nav.querySelectorAll('a');
+    links.forEach(function(link) {
+      link.addEventListener('click', function() {
+        setTimeout(closeMenu, 100);
+      }, false);
+    });
+    
+    // Cerrar con ESC
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
         closeMenu();
       }
-    }, 250);
-  });
-}
+    });
+    
+    // Cerrar al redimensionar
+    window.addEventListener('resize', function() {
+      if (window.innerWidth >= 768) {
+        closeMenu();
+      }
+    });
+  }
+  
+  // Inicializar cuando el DOM esté listo
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMenu);
+  } else {
+    initMenu();
+  }
+})();
