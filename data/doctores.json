@@ -1,19 +1,5 @@
 [
   {
-    "id": "D001",
-    "nombre": "Dr. Carlos Méndez",
-    "especialidad": "Cardiología",
-    "horarioInicio": "09:00",
-    "horarioFin": "17:00",
-    "diasDisponibles": [
-      "Lunes",
-      "Martes",
-      "Miércoles",
-      "Jueves",
-      "Viernes"
-    ]
-  },
-  {
     "id": "D002",
     "nombre": "Dr. Ernesto Salazar",
     "especialidad": "Neurología",
@@ -54,19 +40,6 @@
     "id": "D005",
     "nombre": "Gabriel Alejo M",
     "especialidad": "Cardiología",
-    "horarioInicio": "08:00",
-    "horarioFin": "18:00",
-    "diasDisponibles": [
-      "Lunes",
-      "Martes",
-      "Miércoles",
-      "Viernes"
-    ]
-  },
-  {
-    "id": "D006",
-    "nombre": "xeny",
-    "especialidad": "Gastro",
     "horarioInicio": "08:00",
     "horarioFin": "18:00",
     "diasDisponibles": [

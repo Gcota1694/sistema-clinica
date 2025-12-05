@@ -52,6 +52,11 @@ const pacientesAPI = {
     body: JSON.stringify(paciente)
   }),
 
+  // Eliminar paciente
+  delete: (id) => fetchAPI(`/pacientes/${id}`, {
+    method: 'DELETE'
+  }),
+
   // Obtener historial de citas
   getHistorial: (id) => fetchAPI(`/pacientes/${id}/historial`)
 };
@@ -71,6 +76,17 @@ const doctoresAPI = {
   create: (doctor) => fetchAPI('/doctores', {
     method: 'POST',
     body: JSON.stringify(doctor)
+  }),
+
+  // Actualizar doctor
+  update: (id, doctor) => fetchAPI(`/doctores/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(doctor)
+  }),
+
+  // Eliminar doctor
+  delete: (id) => fetchAPI(`/doctores/${id}`, {
+    method: 'DELETE'
   }),
 
   // Buscar por especialidad
