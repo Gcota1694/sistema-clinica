@@ -11,13 +11,12 @@ function initMobileMenu() {
   const body = document.body;
   
   // Crear overlay si no existe
-  if (!document.querySelector('.menu-overlay')) {
-    const overlay = document.createElement('div');
+  let overlay = document.querySelector('.menu-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
     overlay.className = 'menu-overlay';
     body.appendChild(overlay);
   }
-  
-  const overlay = document.querySelector('.menu-overlay');
   
   if (menuToggle && nav) {
     // Toggle menú al hacer click en el botón hamburguesa
