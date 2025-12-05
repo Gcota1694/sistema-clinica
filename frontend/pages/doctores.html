@@ -60,32 +60,11 @@
         <h2 class="card-title">Personal Médico</h2>
       </div>
       <div class="card-body">
-        <div class="table-container">
-          <table id="tabla-doctores">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Especialidad</th>
-                <th>Teléfono</th>
-                <th>Email</th>
-                <th>Horario</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="lista-doctores">
-              <!-- Se llenará dinámicamente -->
-            </tbody>
-          </table>
+        <div id="lista-doctores">
+          <!-- Las tarjetas se cargarán aquí dinámicamente -->
         </div>
         <div id="loading-doctores" class="loading hidden">
           <div class="spinner"></div>
-        </div>
-        <div id="no-doctores" class="text-center hidden" style="padding: 2rem;">
-          <p class="text-muted">No hay doctores registrados</p>
-          <button class="btn btn-primary mt-2" onclick="mostrarFormularioDoctor()">
-            ➕ Agregar primer doctor
-          </button>
         </div>
       </div>
     </div>
@@ -93,118 +72,12 @@
 
   <!-- MODAL FORMULARIO DOCTOR -->
   <div id="modal-doctor" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="modal-titulo-doctor">Nuevo Doctor</h2>
-        <button class="modal-close" onclick="cerrarModalDoctor()">&times;</button>
-      </div>
-      <form id="form-doctor" onsubmit="guardarDoctor(event)">
-        <input type="hidden" id="doctor-id">
-        
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="doctor-nombre">Nombre Completo *</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              id="doctor-nombre" 
-              required
-              placeholder="Ej: Dr. Juan Pérez"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label" for="doctor-especialidad">Especialidad *</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              id="doctor-especialidad" 
-              required
-              placeholder="Ej: Cardiología"
-            >
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="doctor-telefono">Teléfono *</label>
-            <input 
-              type="tel" 
-              class="form-control" 
-              id="doctor-telefono" 
-              required
-              placeholder="Ej: 555-1234"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label" for="doctor-email">Email</label>
-            <input 
-              type="email" 
-              class="form-control" 
-              id="doctor-email"
-              placeholder="Ej: doctor@clinica.com"
-            >
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="doctor-horario-inicio">Horario Inicio *</label>
-            <input 
-              type="time" 
-              class="form-control" 
-              id="doctor-horario-inicio" 
-              required
-              value="08:00"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label" for="doctor-horario-fin">Horario Fin *</label>
-            <input 
-              type="time" 
-              class="form-control" 
-              id="doctor-horario-fin" 
-              required
-              value="17:00"
-            >
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="doctor-consultorio">Número de Consultorio</label>
-          <input 
-            type="text" 
-            class="form-control" 
-            id="doctor-consultorio"
-            placeholder="Ej: Consultorio 101"
-          >
-        </div>
-
-        <div class="flex gap-2 mt-3">
-          <button type="submit" class="btn btn-primary">
-            💾 Guardar
-          </button>
-          <button type="button" class="btn btn-danger" onclick="cerrarModalDoctor()">
-            ❌ Cancelar
-          </button>
-        </div>
-      </form>
-    </div>
+    <!-- Se llenará dinámicamente -->
   </div>
 
   <!-- MODAL AGENDA DEL DOCTOR -->
   <div id="modal-agenda" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Agenda del Doctor</h2>
-        <button class="modal-close" onclick="cerrarModalAgenda()">&times;</button>
-      </div>
-      <div id="contenido-agenda">
-        <!-- Se llenará dinámicamente -->
-      </div>
-    </div>
+    <!-- Se llenará dinámicamente -->
   </div>
 
   <!-- SCRIPTS -->

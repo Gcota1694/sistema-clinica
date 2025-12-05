@@ -67,7 +67,6 @@ header {
   text-decoration: none;
 }
 
-/* Menú hamburguesa para móvil */
 .menu-toggle {
   display: none;
   background: none;
@@ -185,6 +184,94 @@ nav a.active {
   color: var(--text-dark);
 }
 
+.card-body {
+  /* Contenedor para el body de las tarjetas */
+}
+
+/* ============================================
+   GRID DE TARJETAS PARA PACIENTES/DOCTORES
+   ============================================ */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.item-card {
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: var(--spacing-md);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.item-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.item-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.item-card-id {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  background: #dbeafe;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+}
+
+.item-card-body {
+  margin-bottom: var(--spacing-sm);
+}
+
+.item-card-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+}
+
+.item-card-label {
+  font-weight: 600;
+  color: var(--text-dark);
+  min-width: 90px;
+}
+
+.item-card-value {
+  color: var(--text-dark);
+  flex: 1;
+}
+
+.item-card-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: var(--spacing-xs);
+}
+
+.item-card-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--border-color);
+}
+
+.item-card-actions .btn {
+  flex: 1;
+  min-width: 80px;
+}
+
 /* ============================================
    BOTONES
    ============================================ */
@@ -228,6 +315,11 @@ nav a.active {
   color: white;
 }
 
+.btn-secondary {
+  background-color: var(--text-light);
+  color: white;
+}
+
 .btn-sm {
   padding: 0.25rem 0.75rem;
   font-size: 0.75rem;
@@ -247,7 +339,12 @@ nav a.active {
   color: var(--text-dark);
 }
 
-.form-control {
+.form-label.required::after {
+  content: ' *';
+  color: var(--danger-color);
+}
+
+.form-control, .form-input {
   width: 100%;
   padding: var(--spacing-xs) var(--spacing-sm);
   font-size: 1rem;
@@ -256,10 +353,25 @@ nav a.active {
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.form-control:focus {
+.form-control:focus, .form-input:focus {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-control.error, .form-input.error {
+  border-color: var(--danger-color);
+}
+
+.form-error {
+  display: none;
+  color: var(--danger-color);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.form-input.error + .form-error {
+  display: block;
 }
 
 textarea.form-control {
@@ -282,6 +394,23 @@ select.form-control {
   gap: var(--spacing-md);
 }
 
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  cursor: pointer;
+}
+
 /* ============================================
    TABLAS RESPONSIVAS
    ============================================ */
@@ -292,6 +421,13 @@ select.form-control {
 }
 
 table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-white);
+  font-size: 0.875rem;
+}
+
+.table {
   width: 100%;
   border-collapse: collapse;
   background: var(--bg-white);
@@ -387,6 +523,19 @@ tbody tr:hover {
   background-color: var(--bg-light);
 }
 
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2001;
+}
+
 /* ============================================
    ALERTAS Y MENSAJES
    ============================================ */
@@ -417,6 +566,12 @@ tbody tr:hover {
   border-left: 4px solid var(--warning-color);
 }
 
+.alert-info {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border-left: 4px solid var(--primary-color);
+}
+
 /* ============================================
    BADGES
    ============================================ */
@@ -444,7 +599,7 @@ tbody tr:hover {
   color: #991b1b;
 }
 
-.badge-info {
+.badge-info, .badge-primary {
   background-color: #dbeafe;
   color: #1e40af;
 }
@@ -474,6 +629,50 @@ tbody tr:hover {
 }
 
 /* ============================================
+   EMPTY STATE
+   ============================================ */
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.empty-state-icon {
+  font-size: 4rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.empty-state-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: var(--spacing-xs);
+}
+
+.empty-state-description {
+  color: var(--text-light);
+  margin-bottom: var(--spacing-md);
+}
+
+/* ============================================
+   PAGE HEADER
+   ============================================ */
+.page-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: var(--spacing-xs);
+}
+
+.page-subtitle {
+  color: var(--text-light);
+  font-size: 1rem;
+}
+
+/* ============================================
    UTILIDADES
    ============================================ */
 .text-center {
@@ -482,6 +681,10 @@ tbody tr:hover {
 
 .text-right {
   text-align: right;
+}
+
+.text-muted {
+  color: var(--text-light);
 }
 
 .mt-1 { margin-top: var(--spacing-xs); }
@@ -506,9 +709,14 @@ tbody tr:hover {
   flex-wrap: wrap;
 }
 
-.gap-2 {
-  gap: var(--spacing-sm);
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
+
+.gap-1 { gap: var(--spacing-xs); }
+.gap-2 { gap: var(--spacing-sm); }
 
 .justify-between {
   justify-content: space-between;
@@ -541,6 +749,10 @@ tbody tr:hover {
   .modal-content {
     padding: var(--spacing-xl);
   }
+  
+  .cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
 }
 
 /* ============================================
@@ -554,13 +766,16 @@ tbody tr:hover {
   .form-row.three-cols {
     grid-template-columns: repeat(3, 1fr);
   }
+  
+  .cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  }
 }
 
 /* ============================================
    RESPONSIVE - MÓVIL (menos de 768px)
    ============================================ */
 @media (max-width: 767px) {
-  /* Menú hamburguesa */
   .menu-toggle {
     display: block;
   }
@@ -599,7 +814,6 @@ tbody tr:hover {
     width: 100%;
   }
   
-  /* Overlay para el menú */
   .menu-overlay {
     display: none;
     position: fixed;
@@ -615,7 +829,6 @@ tbody tr:hover {
     display: block;
   }
   
-  /* Ajustes de tarjetas */
   .card-header {
     flex-direction: column;
     align-items: flex-start;
@@ -625,7 +838,10 @@ tbody tr:hover {
     font-size: 1.25rem;
   }
   
-  /* Tablas en móvil - diseño de tarjetas */
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+  
   .table-container {
     border-radius: 0;
   }
@@ -669,7 +885,6 @@ tbody tr:hover {
     justify-content: flex-start;
   }
   
-  /* Botones en móvil */
   .btn {
     width: 100%;
     justify-content: center;
@@ -679,7 +894,11 @@ tbody tr:hover {
     width: auto;
   }
   
-  /* Modal en móvil */
+  .item-card-actions .btn {
+    flex: 1;
+    min-width: 70px;
+  }
+  
   .modal {
     padding: 0;
   }
@@ -690,7 +909,6 @@ tbody tr:hover {
     height: 100vh;
   }
   
-  /* Stats grid en móvil */
   .stats-grid {
     grid-template-columns: 1fr;
   }
@@ -699,7 +917,6 @@ tbody tr:hover {
     font-size: 1.75rem;
   }
   
-  /* Formularios en móvil */
   .form-row {
     grid-template-columns: 1fr;
   }
@@ -718,7 +935,6 @@ tbody tr:hover {
   }
 }
 
-/* Mejora de contraste en modo alto contraste */
 @media (prefers-contrast: high) {
   :root {
     --border-color: #000;

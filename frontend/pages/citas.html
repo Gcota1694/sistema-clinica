@@ -88,10 +88,14 @@
           <div class="spinner"></div>
         </div>
         <div id="no-citas" class="text-center hidden" style="padding: 2rem;">
-          <p class="text-muted">No hay citas registradas</p>
-          <button class="btn btn-primary mt-2" onclick="mostrarFormularioCita()">
-            ➕ Agendar primera cita
-          </button>
+          <div class="empty-state">
+            <div class="empty-state-icon">📅</div>
+            <h3 class="empty-state-title">No hay citas registradas</h3>
+            <p class="empty-state-description">Comienza agendando la primera cita</p>
+            <button class="btn btn-primary mt-2" onclick="mostrarFormularioCita()">
+              ➕ Agendar primera cita
+            </button>
+          </div>
         </div>
       </div>
     </div>

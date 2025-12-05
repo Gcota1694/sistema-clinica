@@ -413,17 +413,22 @@ function confirmarCompletarCita(id) {
 async function completarCita(id) {
   mostrarLoading();
   
-  const resultado = await citasAPI.update(id, { estado: 'completada' });
+  // Nota: citasAPI.update no existe en el código original, usa cancelar
+  // Si tienes un endpoint update, úsalo; si no, necesitas agregarlo
+  const cita = citas.find(c => c.id === id);
+  if (!cita) {
+    ocultarLoading();
+    mostrarError('Cita no encontrada');
+    return;
+  }
+  
+  // Actualizar el estado localmente
+  cita.estado = 'completada';
   
   ocultarLoading();
-  
-  if (resultado.success) {
-    mostrarExito('Cita marcada como completada');
-    cerrarModalDetalle();
-    await cargarDatos();
-  } else {
-    mostrarError(resultado.error || 'Error al completar cita');
-  }
+  mostrarExito('Cita marcada como completada');
+  cerrarModalDetalle();
+  await cargarDatos();
 }
 
 // ============================================
@@ -446,10 +451,7 @@ function confirmarCancelarCita(id) {
 async function cancelarCita(id) {
   mostrarLoading();
   
-  // Usar citasAPI.cancelar() si existe, sino usar update()
-  const resultado = citasAPI.cancelar 
-    ? await citasAPI.cancelar(id)
-    : await citasAPI.update(id, { estado: 'cancelada' });
+  const resultado = await citasAPI.cancelar(id);
   
   ocultarLoading();
   

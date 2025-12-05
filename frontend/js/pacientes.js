@@ -35,92 +35,84 @@ async function cargarPacientes() {
 }
 
 // ============================================
-// MOSTRAR PACIENTES
+// MOSTRAR PACIENTES EN TARJETAS
 // ============================================
 function mostrarPacientes(lista) {
   const container = document.getElementById('lista-pacientes');
   
   if (lista.length === 0) {
     container.innerHTML = `
-      <div class="card">
-        <div class="empty-state">
-          <div class="empty-state-icon">👥</div>
-          <h3 class="empty-state-title">No hay pacientes</h3>
-          <p class="empty-state-description">
-            Comienza agregando tu primer paciente
-          </p>
-          <button class="btn btn-primary" onclick="mostrarFormularioPaciente()">
-            ➕ Agregar Paciente
-          </button>
-        </div>
+      <div class="empty-state">
+        <div class="empty-state-icon">👥</div>
+        <h3 class="empty-state-title">No hay pacientes</h3>
+        <p class="empty-state-description">
+          Comienza agregando tu primer paciente
+        </p>
+        <button class="btn btn-primary" onclick="mostrarFormularioPaciente()">
+          ➕ Agregar Paciente
+        </button>
       </div>
     `;
     return;
   }
   
-  let html = `
-    <div class="card">
-      <div class="table-container">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Edad</th>
-              <th>Teléfono</th>
-              <th>Email</th>
-              <th>Registro</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-  `;
+  // Crear grid de tarjetas
+  let html = '<div class="cards-grid">';
   
   lista.forEach(paciente => {
     html += `
-      <tr>
-        <td><strong>${paciente.id}</strong></td>
-        <td>${paciente.nombre}</td>
-        <td>${paciente.edad} años</td>
-        <td>${paciente.telefono}</td>
-        <td>${paciente.email}</td>
-        <td>${formatearFecha(paciente.fechaRegistro)}</td>
-        <td>
-          <div class="flex gap-1">
-            <button 
-              class="btn btn-sm btn-primary" 
-              onclick="verHistorial('${paciente.id}')"
-              title="Ver historial"
-            >
-              📋
-            </button>
-            <button 
-              class="btn btn-sm btn-secondary" 
-              onclick="editarPaciente('${paciente.id}')"
-              title="Editar"
-            >
-              ✏️
-            </button>
-            <button 
-              class="btn btn-sm btn-danger" 
-              onclick="confirmarEliminarPaciente('${paciente.id}')"
-              title="Eliminar"
-            >
-              🗑️
-            </button>
+      <div class="item-card">
+        <div class="item-card-header">
+          <span class="item-card-id">${paciente.id}</span>
+        </div>
+        
+        <div class="item-card-body">
+          <div class="item-card-name">${paciente.nombre}</div>
+          
+          <div class="item-card-row">
+            <span class="item-card-label">Edad</span>
+            <span class="item-card-value">${paciente.edad} años</span>
           </div>
-        </td>
-      </tr>
+          
+          <div class="item-card-row">
+            <span class="item-card-label">Teléfono</span>
+            <span class="item-card-value">${paciente.telefono}</span>
+          </div>
+          
+          <div class="item-card-row">
+            <span class="item-card-label">Email</span>
+            <span class="item-card-value">${paciente.email}</span>
+          </div>
+        </div>
+        
+        <div class="item-card-actions">
+          <button 
+            class="btn btn-primary btn-sm" 
+            onclick="verHistorial('${paciente.id}')"
+            title="Ver historial"
+          >
+            📋 Historial
+          </button>
+          <button 
+            class="btn btn-warning btn-sm" 
+            onclick="editarPaciente('${paciente.id}')"
+            title="Editar"
+          >
+            ✏️ Editar
+          </button>
+          <button 
+            class="btn btn-danger btn-sm" 
+            onclick="confirmarEliminarPaciente('${paciente.id}')"
+            title="Eliminar"
+          >
+            🗑️ Eliminar
+          </button>
+        </div>
+      </div>
     `;
   });
   
-  html += `
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
-  
+  html += '</div>';
   container.innerHTML = html;
 }
 

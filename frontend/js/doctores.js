@@ -64,85 +64,104 @@ function cargarFiltroEspecialidades() {
 }
 
 // ============================================
-// MOSTRAR DOCTORES EN TABLA
+// MOSTRAR DOCTORES EN TARJETAS
 // ============================================
 function mostrarDoctores(lista) {
-  const tbody = document.querySelector('#tabla-doctores tbody');
+  const container = document.getElementById('lista-doctores');
   
-  if (!tbody) {
-    console.error('No se encontró el tbody de la tabla');
+  if (!container) {
+    console.error('No se encontró el contenedor lista-doctores');
     return;
   }
   
   if (lista.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="7" style="text-align: center; padding: 2rem;">
-          <div class="empty-state">
-            <div class="empty-state-icon">👨‍⚕️</div>
-            <h3 class="empty-state-title">No hay doctores</h3>
-            <p class="empty-state-description">
-              Comienza agregando tu primer doctor
-            </p>
-          </div>
-        </td>
-      </tr>
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">👨‍⚕️</div>
+        <h3 class="empty-state-title">No hay doctores</h3>
+        <p class="empty-state-description">
+          Comienza agregando tu primer doctor
+        </p>
+      </div>
     `;
     return;
   }
   
-  // Renderizar filas de la tabla
-  let html = '';
+  // Crear grid de tarjetas
+  let html = '<div class="cards-grid">';
   
   lista.forEach(doctor => {
     const horario = `${doctor.horarioInicio} - ${doctor.horarioFin}`;
     const dias = doctor.diasDisponibles ? doctor.diasDisponibles.join(', ') : 'N/A';
     
     html += `
-      <tr>
-        <td>${doctor.id || 'N/A'}</td>
-        <td>${doctor.nombre}</td>
-        <td>
-          <span class="badge badge-primary">${doctor.especialidad}</span>
-        </td>
-        <td>${doctor.telefono || 'N/A'}</td>
-        <td>${doctor.email || 'N/A'}</td>
-        <td>
-          <div>🕐 ${horario}</div>
-          <div style="font-size: 0.875rem; color: var(--color-text-light);">
-            📅 ${dias}
+      <div class="item-card">
+        <div class="item-card-header">
+          <span class="item-card-id">${doctor.id || 'N/A'}</span>
+        </div>
+        
+        <div class="item-card-body">
+          <div class="item-card-name">${doctor.nombre}</div>
+          
+          <div class="item-card-row">
+            <span class="item-card-label">Especialidad</span>
+            <span class="badge badge-primary">${doctor.especialidad}</span>
           </div>
-        </td>
-        <td>
-          <div class="flex gap-1">
-            <button 
-              class="btn btn-sm btn-primary" 
-              onclick="verAgenda('${doctor.id}')"
-              title="Ver agenda"
-            >
-              📋 Agenda
-            </button>
-            <button 
-              class="btn btn-sm btn-warning" 
-              onclick="editarDoctor('${doctor.id}')"
-              title="Editar"
-            >
-              ✏️ Editar
-            </button>
-            <button 
-              class="btn btn-sm btn-danger" 
-              onclick="confirmarEliminarDoctor('${doctor.id}')"
-              title="Eliminar"
-            >
-              🗑️ Eliminar
-            </button>
+          
+          ${doctor.telefono ? `
+          <div class="item-card-row">
+            <span class="item-card-label">Teléfono</span>
+            <span class="item-card-value">${doctor.telefono}</span>
           </div>
-        </td>
-      </tr>
+          ` : ''}
+          
+          ${doctor.email ? `
+          <div class="item-card-row">
+            <span class="item-card-label">Email</span>
+            <span class="item-card-value" style="font-size: 0.875rem;">${doctor.email}</span>
+          </div>
+          ` : ''}
+          
+          <div class="item-card-row">
+            <span class="item-card-label">Horario</span>
+            <span class="item-card-value">${horario}</span>
+          </div>
+          
+          <div class="item-card-row">
+            <span class="item-card-label">Días</span>
+            <span class="item-card-value" style="font-size: 0.875rem;">${dias}</span>
+          </div>
+        </div>
+        
+        <div class="item-card-actions">
+          <button 
+            class="btn btn-primary btn-sm" 
+            onclick="verAgenda('${doctor.id}')"
+            title="Ver agenda"
+          >
+            📋 Agenda
+          </button>
+          <button 
+            class="btn btn-warning btn-sm" 
+            onclick="editarDoctor('${doctor.id}')"
+            title="Editar"
+          >
+            ✏️ Editar
+          </button>
+          <button 
+            class="btn btn-danger btn-sm" 
+            onclick="confirmarEliminarDoctor('${doctor.id}')"
+            title="Eliminar"
+          >
+            🗑️ Eliminar
+          </button>
+        </div>
+      </div>
     `;
   });
   
-  tbody.innerHTML = html;
+  html += '</div>';
+  container.innerHTML = html;
 }
 
 // ============================================
@@ -444,13 +463,13 @@ async function verAgenda(doctorId) {
         <div class="card-header flex-between">
           <div>
             <h2 class="card-title">Agenda de ${doctor.nombre}</h2>
-            <p style="color: var(--color-text-light);">${doctor.especialidad}</p>
+            <p style="color: var(--text-light);">${doctor.especialidad}</p>
           </div>
           <button class="btn btn-sm btn-secondary" onclick="cerrarModalAgenda()">✕</button>
         </div>
         
         <div class="card-body">
-          <div style="margin-bottom: 1rem; padding: 1rem; background: var(--color-bg); border-radius: var(--radius);">
+          <div style="margin-bottom: 1rem; padding: 1rem; background: var(--bg-light); border-radius: var(--radius);">
             <p><strong>Horario:</strong> ${doctor.horarioInicio} - ${doctor.horarioFin}</p>
             <p><strong>Días:</strong> ${doctor.diasDisponibles ? doctor.diasDisponibles.join(', ') : 'N/A'}</p>
           </div>
