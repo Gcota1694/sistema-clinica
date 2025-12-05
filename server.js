@@ -342,7 +342,7 @@ app.get('/estadisticas/doctores', (req, res) => {
   res.json({ total: doctores.length, porEspecialidad });
 });
 
-// Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`Servidor escuchando en http://localhost:${PORT}`);
+// Iniciar servidor 
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Servidor escuchando en http://0.0.0.0:${PORT}`);
 });
