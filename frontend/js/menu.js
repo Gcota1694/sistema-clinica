@@ -17,13 +17,14 @@
     if (!overlay) {
       overlay = document.createElement('div');
       overlay.className = 'menu-overlay';
-      body.insertBefore(overlay, body.firstChild);
+      document.body.appendChild(overlay);
     }
     
     // Función para cerrar menú
     function closeMenu() {
       nav.classList.remove('active');
       overlay.classList.remove('active');
+      body.classList.remove('menu-open');
       body.style.overflow = '';
     }
     
@@ -31,11 +32,12 @@
     function openMenu() {
       nav.classList.add('active');
       overlay.classList.add('active');
+      body.classList.add('menu-open');
       body.style.overflow = 'hidden';
     }
     
     // Toggle menú
-    function toggleMenu(e) {
+    menuToggle.onclick = function(e) {
       e.preventDefault();
       e.stopPropagation();
       
@@ -44,46 +46,38 @@
       } else {
         openMenu();
       }
-    }
+    };
     
-    // Eventos del botón hamburguesa
-    menuToggle.addEventListener('click', toggleMenu, false);
-    menuToggle.addEventListener('touchend', function(e) {
-      e.preventDefault();
-      toggleMenu(e);
-    }, false);
-    
-    // Cerrar al hacer clic en overlay
-    overlay.addEventListener('click', closeMenu, false);
-    overlay.addEventListener('touchend', function(e) {
+    // Cerrar al tocar overlay
+    overlay.onclick = function(e) {
       e.preventDefault();
       closeMenu();
-    }, false);
+    };
     
     // Cerrar al hacer clic en enlaces
     const links = nav.querySelectorAll('a');
     links.forEach(function(link) {
-      link.addEventListener('click', function() {
+      link.onclick = function() {
         setTimeout(closeMenu, 100);
-      }, false);
+      };
     });
     
     // Cerrar con ESC
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
+    document.onkeydown = function(e) {
+      if (e.key === 'Escape' && nav.classList.contains('active')) {
         closeMenu();
       }
-    });
+    };
     
     // Cerrar al redimensionar
-    window.addEventListener('resize', function() {
-      if (window.innerWidth >= 768) {
+    window.onresize = function() {
+      if (window.innerWidth >= 768 && nav.classList.contains('active')) {
         closeMenu();
       }
-    });
+    };
   }
   
-  // Inicializar cuando el DOM esté listo
+  // Inicializar
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initMenu);
   } else {
